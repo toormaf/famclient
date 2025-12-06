@@ -1,56 +1,41 @@
-import { Button, Card, Space, Typography } from 'antd';
-import { HomeOutlined, UserOutlined, SettingOutlined, HeartOutlined } from '@ant-design/icons';
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Spin } from 'antd';
 
-const { Title, Paragraph } = Typography;
+const Landing = lazy(() => import('./pages/Landing'));
+const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
+const Home = lazy(() => import('./pages/modules/Home'));
+const Connects = lazy(() => import('./pages/modules/Connects'));
+const Chat = lazy(() => import('./pages/modules/Chat'));
+const Vault = lazy(() => import('./pages/modules/Vault'));
+const Notes = lazy(() => import('./pages/modules/Notes'));
+const Maps = lazy(() => import('./pages/modules/Maps'));
+
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <Spin size="large" />
+  </div>
+);
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <Card className="shadow-lg">
-          <div className="text-center mb-8">
-            <Title level={1} className="!mb-2">
-              <HeartOutlined className="text-red-500 mr-3" />
-              Welcome to Famroot
-            </Title>
-            <Paragraph className="text-gray-600">
-              A React application built with Vite, Tailwind CSS, and Ant Design
-            </Paragraph>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <Card hoverable className="text-center">
-              <HomeOutlined style={{ fontSize: '32px', color: '#1677ff' }} />
-              <Title level={4}>Vite</Title>
-              <Paragraph>Lightning fast build tool</Paragraph>
-            </Card>
-
-            <Card hoverable className="text-center">
-              <UserOutlined style={{ fontSize: '32px', color: '#52c41a' }} />
-              <Title level={4}>Ant Design</Title>
-              <Paragraph>Beautiful UI components</Paragraph>
-            </Card>
-
-            <Card hoverable className="text-center">
-              <SettingOutlined style={{ fontSize: '32px', color: '#722ed1' }} />
-              <Title level={4}>Tailwind CSS</Title>
-              <Paragraph>Utility-first styling</Paragraph>
-            </Card>
-          </div>
-
-          <div className="flex justify-center">
-            <Space size="middle">
-              <Button type="primary" size="large" icon={<HomeOutlined />}>
-                Get Started
-              </Button>
-              <Button size="large" icon={<SettingOutlined />}>
-                Configure
-              </Button>
-            </Space>
-          </div>
-        </Card>
-      </div>
-    </div>
+    <BrowserRouter>
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<Navigate to="/dashboard/home" replace />} />
+            <Route path="home" element={<Home />} />
+            <Route path="connects" element={<Connects />} />
+            <Route path="chat" element={<Chat />} />
+            <Route path="vault" element={<Vault />} />
+            <Route path="notes" element={<Notes />} />
+            <Route path="maps" element={<Maps />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
   );
 }
 

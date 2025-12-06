@@ -15,7 +15,7 @@ const themeConfig: ThemeConfig = {
     colorBgLayout: '#f5f5f5',
     colorBgElevated: '#ffffff',
 
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontFamily: 'Roboto, Lato, "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif',
   },
   components: {
     Button: {
