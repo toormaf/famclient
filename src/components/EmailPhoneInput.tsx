@@ -1,32 +1,42 @@
-import { useState, useEffect } from 'react';
-import { Input, Select, Space } from 'antd';
+import { useState, useEffect, useRef } from 'react';
+import { Input } from 'antd';
 import { MailOutlined, PhoneOutlined } from '@ant-design/icons';
-import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
-import 'react-phone-number-input/style.css';
+import { isValidPhoneNumber, getCountries, getCountryCallingCode } from 'libphonenumber-js';
+import Select from './Select';
 
 interface EmailPhoneInputProps {
   value?: string;
   onChange?: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
-  defaultType?: 'email' | 'phone';
   onValidationChange?: (isValid: boolean) => void;
 }
+
+const COUNTRY_FLAGS: Record<string, string> = {
+  US: '🇺🇸', GB: '🇬🇧', CA: '🇨🇦', AU: '🇦🇺', DE: '🇩🇪', FR: '🇫🇷', IT: '🇮🇹', ES: '🇪🇸',
+  JP: '🇯🇵', CN: '🇨🇳', IN: '🇮🇳', BR: '🇧🇷', MX: '🇲🇽', RU: '🇷🇺', KR: '🇰🇷', NL: '🇳🇱',
+  SE: '🇸🇪', NO: '🇳🇴', DK: '🇩🇰', FI: '🇫🇮', PL: '🇵🇱', TR: '🇹🇷', SA: '🇸🇦', AE: '🇦🇪',
+  SG: '🇸🇬', MY: '🇲🇾', TH: '🇹🇭', PH: '🇵🇭', ID: '🇮🇩', VN: '🇻🇳', PK: '🇵🇰', BD: '🇧🇩',
+  NG: '🇳🇬', ZA: '🇿🇦', EG: '🇪🇬', AR: '🇦🇷', CL: '🇨🇱', CO: '🇨🇴', PE: '🇵🇪', VE: '🇻🇪',
+};
 
 function EmailPhoneInput({
   value = '',
   onChange,
-  placeholder,
+  placeholder = 'Email or phone number',
   disabled = false,
-  defaultType = 'email',
   onValidationChange,
 }: EmailPhoneInputProps) {
-  const [inputType, setInputType] = useState<'email' | 'phone'>(defaultType);
   const [inputValue, setInputValue] = useState(value);
+  const [inputType, setInputType] = useState<'email' | 'phone' | 'unknown'>('unknown');
+  const [selectedCountry, setSelectedCountry] = useState('US');
   const [isValid, setIsValid] = useState(false);
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
+  const inputRef = useRef<any>(null);
 
   useEffect(() => {
     setInputValue(value);
+    detectInputType(value);
   }, [value]);
 
   useEffect(() => {
@@ -37,106 +47,133 @@ function EmailPhoneInput({
     }
   }, [inputValue, inputType, onValidationChange]);
 
-  const validateInput = (val: string, type: 'email' | 'phone'): boolean => {
+  const detectInputType = (val: string) => {
+    if (!val) {
+      setInputType('unknown');
+      setShowCountryPicker(false);
+      return;
+    }
+
+    const firstChar = val.trim()[0];
+
+    if (/[0-9+]/.test(firstChar)) {
+      setInputType('phone');
+      setShowCountryPicker(true);
+    } else if (/[a-zA-Z]/.test(firstChar)) {
+      setInputType('email');
+      setShowCountryPicker(false);
+    } else {
+      setInputType('unknown');
+      setShowCountryPicker(false);
+    }
+  };
+
+  const validateInput = (val: string, type: 'email' | 'phone' | 'unknown'): boolean => {
     if (!val) return false;
 
     if (type === 'email') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(val);
-    } else {
+    } else if (type === 'phone') {
       try {
-        return isValidPhoneNumber(val);
+        const phoneWithCountry = val.startsWith('+') ? val : `+${getCountryCallingCode(selectedCountry as any)}${val}`;
+        return isValidPhoneNumber(phoneWithCountry);
       } catch {
         return false;
       }
     }
+    return false;
   };
 
-  const handleInputChange = (val: string) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
     setInputValue(val);
+    detectInputType(val);
     if (onChange) {
       onChange(val);
     }
   };
 
-  const handleTypeChange = (type: 'email' | 'phone') => {
-    setInputType(type);
-    setInputValue('');
-    if (onChange) {
-      onChange('');
+  const handleCountryChange = (country: string) => {
+    setSelectedCountry(country);
+
+    if (inputValue && !inputValue.startsWith('+')) {
+      const callingCode = getCountryCallingCode(country as any);
+      const newValue = `+${callingCode}${inputValue.replace(/^\+?\d+\s*/, '')}`;
+      setInputValue(newValue);
+      if (onChange) {
+        onChange(newValue);
+      }
     }
   };
 
-  const selectBefore = (
-    <Select
-      value={inputType}
-      onChange={handleTypeChange}
-      disabled={disabled}
-      style={{ width: 100 }}
-    >
-      <Select.Option value="email">
-        <Space>
-          <MailOutlined />
-          Email
-        </Space>
-      </Select.Option>
-      <Select.Option value="phone">
-        <Space>
-          <PhoneOutlined />
-          Phone
-        </Space>
-      </Select.Option>
-    </Select>
-  );
+  const getIcon = () => {
+    if (inputType === 'email') return <MailOutlined />;
+    if (inputType === 'phone') return <PhoneOutlined />;
+    return <MailOutlined />;
+  };
+
+  const getPlaceholder = () => {
+    if (inputType === 'email') return 'Enter your email';
+    if (inputType === 'phone') return 'Enter your phone number';
+    return placeholder;
+  };
+
+  const countries = getCountries();
 
   return (
-    <div className="email-phone-input">
-      {inputType === 'email' ? (
-        <Input
-          addonBefore={selectBefore}
-          value={inputValue}
-          onChange={(e) => handleInputChange(e.target.value)}
-          placeholder={placeholder || 'Enter your email'}
-          disabled={disabled}
-          status={inputValue && !isValid ? 'error' : ''}
-          prefix={<MailOutlined />}
-        />
-      ) : (
-        <div className="flex gap-2">
-          <div className="flex-shrink-0">{selectBefore}</div>
-          <div className="flex-1">
-            <PhoneInput
-              international
-              defaultCountry="US"
-              value={inputValue}
-              onChange={(val) => handleInputChange(val || '')}
+    <div className="email-phone-input-container">
+      <div className="flex items-center gap-2 relative">
+        <div
+          className={`country-picker-wrapper ${showCountryPicker ? 'show' : ''}`}
+          style={{
+            width: showCountryPicker ? '100px' : '0px',
+            opacity: showCountryPicker ? 1 : 0,
+            overflow: 'hidden',
+            transition: 'width 0.3s ease, opacity 0.3s ease',
+          }}
+        >
+          {showCountryPicker && (
+            <Select
+              value={selectedCountry}
+              onChange={handleCountryChange}
               disabled={disabled}
-              placeholder={placeholder || 'Enter your phone number'}
-              className={`ant-input ${inputValue && !isValid ? 'ant-input-status-error' : ''}`}
-              style={{
-                width: '100%',
-                height: '32px',
-                padding: '4px 11px',
-                fontSize: '14px',
-                border: '1px solid #d9d9d9',
-                borderRadius: '6px',
-              }}
-            />
-          </div>
+              style={{ width: '100%' }}
+              showSearch
+              optionFilterProp="children"
+            >
+              {countries.map((country) => (
+                <Select.Option key={country} value={country}>
+                  <span style={{ marginRight: '8px' }}>
+                    {COUNTRY_FLAGS[country] || '🌍'}
+                  </span>
+                  {country}
+                </Select.Option>
+              ))}
+            </Select>
+          )}
         </div>
-      )}
+        <div className="flex-1">
+          <Input
+            ref={inputRef}
+            value={inputValue}
+            onChange={handleInputChange}
+            placeholder={getPlaceholder()}
+            disabled={disabled}
+            status={inputValue && !isValid ? 'error' : ''}
+            prefix={getIcon()}
+            style={{
+              transition: 'all 0.3s ease',
+            }}
+          />
+        </div>
+      </div>
       <style>{`
-        .email-phone-input .react-phone-number-input__input {
-          border: none !important;
-          outline: none !important;
-          padding: 0 !important;
-          background: transparent !important;
-        }
-        .email-phone-input .react-phone-number-input__country {
-          margin-right: 8px;
-        }
-        .email-phone-input .ant-input-status-error {
+        .email-phone-input-container .ant-input-status-error {
           border-color: #ff4d4f;
+        }
+        .country-picker-wrapper {
+          flex-shrink: 0;
         }
       `}</style>
     </div>

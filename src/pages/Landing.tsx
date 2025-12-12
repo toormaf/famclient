@@ -1,9 +1,28 @@
-import { AndroidFilled , AppleFilled} from '@ant-design/icons';
+import { AndroidFilled, AppleFilled, LockOutlined } from '@ant-design/icons';
 import { URLS } from './Urls';
 import { useState } from 'react';
+import { Form, Input, Button, message } from 'antd';
+import { EmailPhoneInput } from '../components';
 
 function Landing() {
   const [index, setIndex] = useState(0);
+  const [contactValue, setContactValue] = useState('');
+  const [password, setPassword] = useState('');
+  const [isContactValid, setIsContactValid] = useState(false);
+  const [form] = Form.useForm();
+
+  const handleLogin = () => {
+    if (!isContactValid) {
+      message.error('Please enter a valid email or phone number');
+      return;
+    }
+    if (!password) {
+      message.error('Please enter your password');
+      return;
+    }
+    message.success('Login successful!');
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="px-6 py-4 flex items-center justify-between">
@@ -42,8 +61,53 @@ function Landing() {
               <span className={(index ==2 ?"bg-primary":"bg-white")+" block w-3 h-3 shadow-xl cursor-pointer rounded-full"} onClick={()=>setIndex(2)}></span>
           </div>
         </div>
-        <div className="w-[380px] h-[60vh] flex flex-col items-center max-w-xl mx-auto shadow-lg bg-white br-1 rounded p-10 box-border">
-            <h2>LOGIN</h2>
+        <div className="w-[380px] flex flex-col items-center max-w-xl mx-auto shadow-lg bg-white rounded-lg p-8 box-border">
+          <h2 className="text-2xl font-bold mb-6 text-gray-800">LOGIN</h2>
+          <Form
+            form={form}
+            layout="vertical"
+            className="w-full"
+            onFinish={handleLogin}
+          >
+            <Form.Item
+              label="Email or Phone Number"
+              required
+              className="mb-4"
+            >
+              <EmailPhoneInput
+                value={contactValue}
+                onChange={setContactValue}
+                onValidationChange={setIsContactValid}
+                placeholder="Email or phone number"
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="Password"
+              required
+              className="mb-6"
+            >
+              <Input.Password
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                prefix={<LockOutlined />}
+                size="large"
+              />
+            </Form.Item>
+
+            <Form.Item className="mb-0">
+              <Button
+                type="primary"
+                htmlType="submit"
+                size="large"
+                block
+                disabled={!isContactValid || !password}
+              >
+                Login Now
+              </Button>
+            </Form.Item>
+          </Form>
         </div>
       </main>
 

@@ -52,7 +52,6 @@ function Home() {
               value={contactValue}
               onChange={setContactValue}
               onValidationChange={setIsValid}
-              defaultType="email"
             />
           </Form.Item>
           <Form.Item>
@@ -62,8 +61,8 @@ function Home() {
           </Form.Item>
         </Form>
         <Paragraph className="text-gray-500 text-sm">
-          This component supports both email and phone number input with validation.
-          Switch between input types using the dropdown.
+          This component automatically detects input type based on your entry.
+          Start with a letter for email or a number for phone. Country picker appears automatically for phone numbers.
         </Paragraph>
       </Card>
     </div>
