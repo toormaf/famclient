@@ -1,9 +1,22 @@
-import { Card, Typography } from 'antd';
+import { useState } from 'react';
+import { Card, Typography, Form, Button, message } from 'antd';
 import { HomeOutlined } from '@ant-design/icons';
+import { EmailPhoneInput } from '../../components';
 
 const { Title, Paragraph } = Typography;
 
 function Home() {
+  const [contactValue, setContactValue] = useState('');
+  const [isValid, setIsValid] = useState(false);
+
+  const handleSubmit = () => {
+    if (isValid) {
+      message.success(`Contact information saved: ${contactValue}`);
+    } else {
+      message.error('Please enter a valid email or phone number');
+    }
+  };
+
   return (
     <div>
       <Title level={2}>
@@ -31,6 +44,28 @@ function Home() {
           </Paragraph>
         </Card>
       </div>
+
+      <Card className="mt-6" title="Contact Information Example">
+        <Form layout="vertical">
+          <Form.Item label="Email or Phone Number" required>
+            <EmailPhoneInput
+              value={contactValue}
+              onChange={setContactValue}
+              onValidationChange={setIsValid}
+              defaultType="email"
+            />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" onClick={handleSubmit} disabled={!isValid}>
+              Save Contact
+            </Button>
+          </Form.Item>
+        </Form>
+        <Paragraph className="text-gray-500 text-sm">
+          This component supports both email and phone number input with validation.
+          Switch between input types using the dropdown.
+        </Paragraph>
+      </Card>
     </div>
   );
 }
