@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, Typography, Form, Button, message } from 'antd';
+import { Card, Typography, Form, Button } from 'antd';
 import { HomeOutlined } from '@ant-design/icons';
 import { EmailPhoneInput } from '../../components';
 
@@ -11,9 +11,9 @@ function Home() {
 
   const handleSubmit = () => {
     if (isValid) {
-      message.success(`Contact information saved: ${contactValue}`);
+      // message.success(`Contact information saved: ${contactValue}`);
     } else {
-      message.error('Please enter a valid email or phone number');
+      // message.error('Please enter a valid email or phone number');
     }
   };
 

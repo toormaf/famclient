@@ -2,13 +2,11 @@ export const URLS = {
     ANDROID_APP_LINK: "https://play.google.com/store/apps/details?id=com.pubg.imobile&hl=en_IN&gl=US",
     IOS_APP_LINK: "https://apps.apple.com/us/app/pubg-mobile-resistance/id1330123889"
 };
-
 export const API_ENDPOINTS = {
     BASE_URL: import.meta.env.VITE_API_BASE_URL || '',
-
-    AUTH: {
-        LOGIN: '/auth/login',
-        REGISTER: '/auth/register',
+    ACCOUNT: {
+        LOGIN: '/account/login',
+        SIGNUP: '/account/signup',
         LOGOUT: '/auth/logout',
         REFRESH_TOKEN: '/auth/refresh',
         FORGOT_PASSWORD: '/auth/forgot-password',
@@ -60,3 +58,5 @@ export const API_ENDPOINTS = {
         DELETE: '/notes/delete',
     },
 };
+
+export const UN_AUTH_URLS = [API_ENDPOINTS.ACCOUNT.LOGIN, API_ENDPOINTS.ACCOUNT.SIGNUP];
