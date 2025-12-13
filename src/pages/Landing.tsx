@@ -1,5 +1,5 @@
 import { AndroidFilled, AppleFilled, ArrowLeftOutlined, UserOutlined } from '@ant-design/icons';
-import { URLS } from './Urls';
+import { URLS } from '../utils/Urls';
 import { useState } from 'react';
 import { Form, Input, Button, message, Checkbox } from 'antd';
 import { EmailPhoneInput, Icons } from '../components';
