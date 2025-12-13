@@ -5,15 +5,15 @@ import * as Aicon from '@ant-design/icons';
 const MessageService = {
     oldErrorContent : "",
     error: (content:string, duration = ERROR_MESSAGE_TIMING)=>{
-        message.error({key:content, type:'error', content: <div className="flexr-sb gap15">
+        message.error({key:content, type:'error', content: <div className="flex justify-between gap-4">
             {content}
-            <Aicon.CloseOutlined className="txt12" onClick={() => message.destroy()}/>
+            <Aicon.CloseOutlined className="text-xs" onClick={() => message.destroy()}/>
         </div>, duration: duration});
     },
     success: (content:string, duration = ERROR_MESSAGE_TIMING)=>{
-        message.success({key:content, type:'error', content: <div className="flexr-sb gap15">
+        message.success({key:content, type:'error', content: <div className="flex justify-between gap-4">
             {content}
-            <Aicon.CloseOutlined className="txt12" onClick={() => message.destroy()}/>
+            <Aicon.CloseOutlined className="text-xs" onClick={() => message.destroy()}/>
         </div>, duration: duration});
     },
     setConfig: (config:any)=>{

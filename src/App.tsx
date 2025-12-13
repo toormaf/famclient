@@ -1,6 +1,8 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, HashRouter } from 'react-router-dom';
 import { Spin } from 'antd';
+import ApiService from './services/Api.service';
+import MessageService from './services/Message.service';
 
 const Landing = lazy(() => import('./pages/Landing'));
 const Home = lazy(() => import('./pages/modules/Home'));
@@ -25,6 +27,11 @@ const LoadingFallback = () => (
 );
 
 function App() {
+  useEffect(() => {
+    ApiService.init();
+    MessageService.setConfig({maxCount: 1});
+  }, []);// eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <HashRouter>
       <Suspense fallback={<LoadingFallback />}>

@@ -1,10 +1,11 @@
 import { AndroidFilled, AppleFilled, ArrowLeftOutlined, UserOutlined } from '@ant-design/icons';
-import { URLS } from '../constants/Urls';
+import { API_ENDPOINTS, URLS } from '../constants/Urls';
 import { useState } from 'react';
 import { Form, Input, Button, Checkbox } from 'antd';
 import { EmailPhoneInput, Icons } from '../components';
 import { Link } from 'react-router-dom';
 import MessageService from '../services/Message.service';
+import ApiService from '../services/Api.service';
 
 function LandingHeader(){
   return (
@@ -61,16 +62,45 @@ function Landing(props:any) {
   const [isContactValid, setIsContactValid] = useState(false);
   const [view, setView] = useState(props.show ? props.show : "login");
 
-  const handleLogin = () => {
+  const formData = ()=>{
+    return {
+      username: contactValue,
+      password: password,
+      scope: 1,
+      remember: rememberMe
+    };
+  }
+
+  const isInputValid = ()=>{
     if (!isContactValid) {
       MessageService.error('Please enter a valid email or phone number');
-      return;
+      return false;
     }
     if (!password) {
       MessageService.error('Please enter your password');
-      return;
+      return false;
     }
-    MessageService.success('Login successful!');
+    return true;
+  }
+
+
+  const handleAuth = () => {
+    if(isInputValid()){
+      if(view == "login"){
+        ApiService.post(API_ENDPOINTS.ACCOUNT.LOGIN,formData(),{},(error)=>{
+          if(error?.response?.data?.status === "error"){
+            if(error.response.data.message.indexOf("try signup") > -1){
+                setView("signup");
+            }else{
+                MessageService.error(error.response.data.message);
+            }
+          }
+        });  
+      }else if(view == "signup"){
+        
+      }  
+    }
+
   };
 
   return (
@@ -86,7 +116,7 @@ function Landing(props:any) {
             {view == "reset-password" ? <div><Link to="/login" onClick={()=>setView("login")}><ArrowLeftOutlined className='mr-10'/></Link><span className='mr-10'>Reset Password</span></div>:""}
           </h2>
           
-          <Form layout="vertical" className="w-full" onFinish={handleLogin}>
+          <Form layout="vertical" className="w-full">
             <Form.Item required className="mb-8">
               <EmailPhoneInput 
                 value={contactValue} 
@@ -119,13 +149,13 @@ function Landing(props:any) {
             { 
               view == "login" &&  
               <div className="flex justify-between mb-8">
-                  <Checkbox value={rememberMe} onChange={(e:any)=>setRememberMe(e.target.checked)}>Remember me</Checkbox>
+                  <Checkbox checked={rememberMe} onChange={(e:any)=>setRememberMe(e.target.checked)}>Remember me</Checkbox>
                   <Link to="/reset-password" className="text-link" onClick={()=>setView("reset-password")}>Forgot Password ?</Link>
               </div>
             }
 
             <Form.Item className="mb-0 flex justify-center">
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="submit" onClick={handleAuth}>
                 {view == "login" && <>Login Now</>}
                 {view == "signup" && <>Continue & Send OTP</>}
                 {view == "reset-password" && <>Send Verification Code</>}

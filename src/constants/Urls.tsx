@@ -3,7 +3,6 @@ export const URLS = {
     IOS_APP_LINK: "https://apps.apple.com/us/app/pubg-mobile-resistance/id1330123889"
 };
 export const API_ENDPOINTS = {
-    BASE_URL: import.meta.env.VITE_API_BASE_URL || '',
     ACCOUNT: {
         LOGIN: '/account/login',
         SIGNUP: '/account/signup',

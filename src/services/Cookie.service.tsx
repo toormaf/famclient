@@ -1,17 +1,16 @@
-import * as ls from "local-storage";
-const cacheKeySet = ["authToken"];
+import { LOCAL_STORAGE_KEY_SET } from "../constants/Constants";
 const CookieService = {
     get: function(key:string){
-        return ls.get(key);
+        return localStorage.getItem(key);
     },
     set: function(key:string, value:any){
-        if(cacheKeySet.indexOf(key) > -1){
-            ls.set(key,value);
+        if(LOCAL_STORAGE_KEY_SET.indexOf(key) > -1){
+            localStorage.setItem(key,value);
         }
     },
     clearAll: function(){
-        cacheKeySet.map((key) => {
-            ls.remove(key);
+        LOCAL_STORAGE_KEY_SET.map((key) => {
+            localStorage.removeItem(key);
             return undefined;
         });
     }
