@@ -1,8 +1,9 @@
-import { AndroidFilled, AppleFilled } from '@ant-design/icons';
+import { AndroidFilled, AppleFilled, ArrowLeftOutlined, UserOutlined } from '@ant-design/icons';
 import { URLS } from './Urls';
 import { useState } from 'react';
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button, message, Checkbox } from 'antd';
 import { EmailPhoneInput, Icons } from '../components';
+import { Link } from 'react-router-dom';
 
 function LandingHeader(){
   return (
@@ -49,11 +50,15 @@ function LandingCarousel(){
   );
 }
 
-function Landing({ show: _show }: { show?: string }) {
+function Landing(props:any) {
+  
   const [contactValue, setContactValue] = useState('');
   const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
+
   const [isContactValid, setIsContactValid] = useState(false);
-  const [form] = Form.useForm();
+  const [view, setView] = useState(props.show ? props.show : "login");
 
   const handleLogin = () => {
     if (!isContactValid) {
@@ -72,26 +77,86 @@ function Landing({ show: _show }: { show?: string }) {
       <LandingHeader></LandingHeader>
       <main className="flex-1 flex items-center justify-center bg-[url('/src/public/image/BG.svg')] bg-cover bg-center bg-no-repeat">
         <LandingCarousel></LandingCarousel>
-        <div className="w-[380px] flex flex-col items-center max-w-xl mx-auto shadow-lg bg-white rounded-lg p-8 box-border">
-          <h2 className="text-2xl font-bold mb-6 text-gray-800">LOGIN</h2>
-          <Form form={form} layout="vertical" className="w-full" onFinish={handleLogin}>
-            <Form.Item required className="mb-4">
-              <EmailPhoneInput value={contactValue} onChange={setContactValue} onValidationChange={setIsContactValid}
+        <div className="w-[380px] h-[60vh] flex flex-col items-center justify-around max-w-xl mx-auto shadow-lg bg-white rounded-lg p-8 box-border">
+
+          <h2 className="text-2xl font-bold text-gray-800">
+            {view == "login" ?"LOGIN":""}
+            {view == "signup" ?"Create Free Account":""}
+            {view == "reset-password" ? <div><Link to="/login" onClick={()=>setView("login")}><ArrowLeftOutlined className='mr-10'/></Link><span className='mr-10'>Reset Password</span></div>:""}
+          </h2>
+          
+          <Form layout="vertical" className="w-full" onFinish={handleLogin}>
+            <Form.Item required className="mb-8">
+              <EmailPhoneInput 
+                value={contactValue} 
+                onChange={setContactValue} 
+                onValidationChange={setIsContactValid} 
+                prefix={<UserOutlined className='text-grey'/>} 
                 placeholder="Email or phone number"/>
             </Form.Item>
+            {
+              view != "reset-password" &&
+              <Form.Item required className="mb-8">
+                <Input.Password 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  prefix={<Icons.KeyOutline className='text-grey'/>} 
+                  placeholder="Enter your password"/>
+              </Form.Item>
+            }
+            {
+              view == "signup" &&  
+              <Form.Item required className="mb-8">
+                <Input.Password 
+                  value={otp} 
+                  onChange={(e) => setOtp(e.target.value)} 
+                  prefix={<Icons.KeyOutline className='text-grey'/>} 
+                  placeholder="Enter OTP sent"/>
+              </Form.Item>
+            }
 
-            <Form.Item required className="mb-6">
-              <Input.Password value={password} onChange={(e) => setPassword(e.target.value)} prefix={<Icons.KeyOutline className='text-grey'/>} size="middle"
-                placeholder="Enter your password" />
-            </Form.Item>
+            { 
+              view == "login" &&  
+              <div className="flex justify-between mb-8">
+                  <Checkbox value={rememberMe} onChange={(e:any)=>setRememberMe(e.target.checked)}>Remember me</Checkbox>
+                  <Link to="/reset-password" className="text-link" onClick={()=>setView("reset-password")}>Forgot Password ?</Link>
+              </div>
+            }
 
             <Form.Item className="mb-0 flex justify-center">
-              <Button type="primary" htmlType="submit" size="middle">Login Now</Button>
+              <Button type="primary" htmlType="submit">
+                {view == "login" && <>Login Now</>}
+                {view == "signup" && <>Continue & Send OTP</>}
+                {view == "reset-password" && <>Send Verification Code</>}
+              </Button>
             </Form.Item>
           </Form>
+
+          <div className='flex flex-col items-center'>
+            <p className="flex items-center gap-1 text-sm">
+              { 
+                view == "login" &&  <>
+                  <span>Don't have an account ?</span>
+                  <Link to="/signup" className="text-link" onClick={()=>setView("signup")}>Signup here</Link>
+                </>
+                }{ (view == "signup" || view == "reset-password") &&  <>
+                  <span>Already had an account ?</span>
+                  <Link to="/login" className="text-link" onClick={()=>setView("login")}>Login here</Link>
+                </>
+              }
+            </p>
+            {
+              view == "signup" && 
+              <p className='break-word text-center text-xs'>
+                <span>By clicking continue, you agree to the</span>
+                <Link className="ml-1 mr-1 text-link" to="/services-terms">Service terms</Link>
+                <span>and</span>
+                <Link className="ml-1 mr-1 text-link" to="/privacy-policy">Privacy Policy</Link>
+              </p>
+            }
+          </div>
         </div>
       </main>
-
       <footer className="p-2 text-center text-gray-600 text-sm text-bold font-medium">
         <p>Famroot@2025</p>
       </footer>

@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Input } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
 import { isValidPhoneNumber, getCountries, getCountryCallingCode } from 'libphonenumber-js';
 import Select from './Select';
 
 interface EmailPhoneInputProps {
   value?: string;
+  prefix?: any;
   onChange?: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
@@ -22,6 +22,7 @@ const COUNTRY_FLAGS: Record<string, string> = {
 
 function EmailPhoneInput({
   value = '',
+  prefix = undefined,
   onChange,
   placeholder = 'Email or phone number',
   disabled = false,
@@ -156,7 +157,7 @@ function EmailPhoneInput({
             placeholder={getPlaceholder()}
             disabled={disabled}
             status={inputValue && !isValid ? 'error' : ''}
-            prefix={<UserOutlined className='text-grey'/>}
+            prefix={prefix}
             style={{
               transition: 'all 0.3s ease',
             }}

@@ -8,6 +8,7 @@ export default {
     extend: {
       colors:{
         'primary': '#009688', // your primary color hex code
+        'link':'#1677ff',
         'grey': '#ccc',
       },
       boxShadow:{
