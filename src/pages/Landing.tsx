@@ -49,7 +49,7 @@ function LandingCarousel(){
   );
 }
 
-function Landing(show:any) {
+function Landing({ show: _show }: { show?: string }) {
   const [contactValue, setContactValue] = useState('');
   const [password, setPassword] = useState('');
   const [isContactValid, setIsContactValid] = useState(false);
