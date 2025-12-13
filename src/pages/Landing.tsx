@@ -1,7 +1,7 @@
 import { AndroidFilled, AppleFilled, ArrowLeftOutlined, UserOutlined } from '@ant-design/icons';
-import { API_ENDPOINTS, URLS } from '../constants/Urls';
+import { URLS } from '../constants/Urls';
 import { useState } from 'react';
-import { Form, Input, Button, message, Checkbox } from 'antd';
+import { Form, Input, Button, Checkbox } from 'antd';
 import { EmailPhoneInput, Icons } from '../components';
 import { Link } from 'react-router-dom';
 import MessageService from '../services/Message.service';
@@ -26,7 +26,6 @@ function LandingHeader(){
 
 function LandingCarousel(){
   const [index, setIndex] = useState(0);
-  const baseurl = API_ENDPOINTS.BASE_URL;
   return (
     <div className="w-full max-w-xl mx-auto overflow-hidden rounded-xl">
       <div className="flex transition-transform duration-700 ease-in-out" style={{ transform: `translateX(-${index * 100}%)` }}>

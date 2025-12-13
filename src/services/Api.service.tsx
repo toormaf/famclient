@@ -1,21 +1,18 @@
 import { UN_AUTH_URLS } from "../constants/Urls";
 import CookieService from "./Cookie.service";
 import MessageService from "./Message.service";
-import axios from "axios";
+import CacheService from "./Cache.service";
+import axios, { AxiosRequestConfig } from "axios";
 import * as _ from "lodash";
-
-// import * as MainActions from "../components/MainActions";
-// import CacheService from "./CacheService";
 
 export const AInterceptor = {
     init: function(){
         axios.interceptors.response.use(function (response) {
-            // Any status code that lie within the range of 2xx cause this function to trigger
             try{
                 if(response.headers.ott){
-                    if(!(response.config && JSON.parse(response.config.data).operation === 'contact_verification')){
-                        CookieService.set('authToken',response.headers.ott);                            
-                    }    
+                    if(!(response.config && response.config.data && JSON.parse(response.config.data as string).operation === 'contact_verification')){
+                        CookieService.set('authToken',response.headers.ott);
+                    }
                 }
             }catch(e){
                 console.log(e);
@@ -25,32 +22,42 @@ export const AInterceptor = {
             if(error.response && error.response.headers && error.response.headers.ott){
                 CookieService.set('authToken',error.response.headers.ott);
             }
-            // Any status codes that falls outside the range of 2xx cause this function to trigger
-            // Do something with response error
             return Promise.reject(error);
           });
-    }    
+    }
 }
+
+interface ApiTracker {
+    url: string;
+    method: string;
+    config: any;
+    data?: any;
+    failureCallback?: (error: any) => void;
+}
+
 const ApiService = {
-    errorTrackList: [],
-    getHeader: function(url: string){
+    errorTrackList: [] as any[],
+
+    getHeader: function(url: string): Record<string, string>{
         MessageService.destroy();
         if(UN_AUTH_URLS.indexOf(url) > -1){
             CookieService.clearAll();
             return {};
         }else{
-            const authToken = CookieService.get("authToken");
+            const authToken = CookieService.get("authToken") as string;
             return {
-                "authorization":authToken,
-                "content-type": "application/json"
+                "Authorization": authToken || "",
+                "Content-Type": "application/json"
             };
         }
     },
-    getParams: function(params:any){
+
+    getParams: function(params: any){
         return params;
     },
-    getConfig: function(url: string, params:any){
-        let headerParams = {};
+
+    getConfig: function(url: string, params: any): AxiosRequestConfig{
+        let headerParams: any = {};
         if(params){
             headerParams = _.clone(params.header);
             delete params.header;
@@ -61,127 +68,126 @@ const ApiService = {
             params: ApiService.getParams(params)
         }
     },
-    getQuick: function(url: string, params:any){
-        return axios.get(url,ApiService.getConfig(url, params));
+
+    getQuick: function(url: string, params: any){
+        return axios.get(url, ApiService.getConfig(url, params));
     },
-    postQuick: function(url: string, data:any, params:any){
-        return axios.post(url,data, ApiService.getConfig(url, params));
+
+    postQuick: function(url: string, data: any, params: any){
+        return axios.post(url, data, ApiService.getConfig(url, params));
     },
-    get: async function(dispatch, url: string, params:any, failureCallback) {
-        let apiCacheUrl = url+(params ? "?"+JSON.stringify(params):"");
+
+    get: async function(_dispatch: any, url: string, params: any, failureCallback?: (error: any) => void) {
+        let apiCacheUrl = url + (params ? "?" + JSON.stringify(params) : "");
         if(!CacheService.isCached(apiCacheUrl)){
-            const uniqueId = crypto.randomUUID();
             const config = ApiService.getConfig(url, params);
-            ApiService.startApi(dispatch, uniqueId, url, 'GET', config, undefined);
-            const response = await axios.get(url,config).then((response)=>{
-                return ApiService.endApi(dispatch, response, uniqueId);
+            const response = await axios.get(url, config).then((response) => {
+                return response.data;
             }).catch((error) => {
-                ApiService.errorLogger(dispatch, error, uniqueId, failureCallback);
+                ApiService.errorLogger(error, failureCallback);
+                return undefined;
             });
 
             if (response !== undefined) {
                 let cacheData;
                 try {
-                if (typeof response === "string") {
-                    cacheData = JSON.parse(response); // Try to parse if it's a stringified JSON
-                } else {
-                    cacheData = response; // Already a JSON object or non-string
-                }
+                    if (typeof response === "string") {
+                        cacheData = JSON.parse(response);
+                    } else {
+                        cacheData = response;
+                    }
                 } catch (e) {
-                    cacheData = response; // Parsing failed, treat as non-JSON
+                    cacheData = response;
                 }
-                CacheService.update(dispatch, apiCacheUrl, cacheData);
+                CacheService.update(apiCacheUrl, cacheData);
             }
             return response;
         }else{
-            return CacheService.get(dispatch, apiCacheUrl);
+            return CacheService.get(apiCacheUrl);
         }
     },
-    delete: async function(dispatch, url, params, failureCallback){
-        const uniqueId = crypto.randomUUID();
+
+    delete: async function(_dispatch: any, url: string, params: any, failureCallback?: (error: any) => void){
         const config = ApiService.getConfig(url, params);
-        ApiService.startApi(dispatch, uniqueId, url, 'DELETE', config, undefined);
-        const response = await axios.delete(url,config).then((response)=>{
-            return ApiService.endApi(dispatch, response, uniqueId);
+        const response = await axios.delete(url, config).then((response) => {
+            return response.data;
         }).catch((error) => {
-            ApiService.errorLogger(dispatch, error, uniqueId, failureCallback);
+            ApiService.errorLogger(error, failureCallback);
+            return undefined;
         });
         return response;
     },
-    post: async function(dispatch, url, data, params, failureCallback){
-        const uniqueId = crypto.randomUUID();
+
+    post: async function(_dispatch: any, url: string, data: any, params: any, failureCallback?: (error: any) => void){
         const config = ApiService.getConfig(url, params);
-        ApiService.startApi(dispatch, uniqueId, url, 'POST', config, data);
-        const response = await axios.post(url,data,config).then((response)=>{
-            return ApiService.endApi(dispatch, response, uniqueId);
+        const response = await axios.post(url, data, config).then((response) => {
+            return response.data;
         }).catch((error) => {
-            ApiService.errorLogger(dispatch, error, uniqueId, failureCallback);
+            ApiService.errorLogger(error, failureCallback);
+            return undefined;
         });
         return response;
     },
-    put: async function(dispatch, url, data, params, failureCallback){
-        const uniqueId = crypto.randomUUID();
+
+    put: async function(_dispatch: any, url: string, data: any, params: any, failureCallback?: (error: any) => void){
         const config = ApiService.getConfig(url, params);
-        ApiService.startApi(dispatch, uniqueId, url, 'PUT', config, data);
-        const response = await axios.put(url,data,config).then((response)=>{
-            return ApiService.endApi(dispatch, response, uniqueId);
+        const response = await axios.put(url, data, config).then((response) => {
+            return response.data;
         }).catch((error) => {
-            ApiService.errorLogger(dispatch, error, uniqueId, failureCallback);
+            ApiService.errorLogger(error, failureCallback);
+            return undefined;
         });
         return response;
     },
-    multipartRequest: async function(dispatch, url, data, params, failureCallback){
-        const uniqueId = crypto.randomUUID();
+
+    multipartRequest: async function(_dispatch: any, url: string, data: any, params: any, failureCallback?: (error: any) => void){
         const config = ApiService.getConfig(url, params);
-        config.headers["Content-Type"] = "multipart/form-data";
-        ApiService.startApi(dispatch, uniqueId, url, 'POST', config, data);
-        const response = await axios.post(url,data,config).then((response)=>{
-            return ApiService.endApi(dispatch, response, uniqueId);
+        if (config.headers) {
+            config.headers["Content-Type"] = "multipart/form-data";
+        }
+        const response = await axios.post(url, data, config).then((response) => {
+            return response.data;
         }).catch((error) => {
-            ApiService.errorLogger(dispatch, error, uniqueId, failureCallback);
+            ApiService.errorLogger(error, failureCallback);
+            return undefined;
         });
         return response;
-    },    
-    startApi: async (dispatch, uid, url, method, config, data) =>{
-        MainActions.startApi(dispatch, uid, url, method, config, data);
     },
-    endApi: async (dispatch, response, uniqueId) =>{
-        MainActions.updateServerAvailability(dispatch, true);
-        MainActions.endApi(dispatch, uniqueId);
+
+    startApi: async (_dispatch: any, _uid: string, _url: string, _method: string, _config: any, _data: any) => {
+    },
+
+    endApi: async (_dispatch: any, response: any, _uniqueId: string) => {
         return response;
     },
-    errorLogger: async function(dispatch, error, uniqueId, callBack){
-        MainActions.updateServerAvailability(dispatch, error.message !== 'Network Error');
-        setTimeout(()=>{MainActions.endApi(dispatch, uniqueId);},3000);
+
+    errorLogger: async function(error: any, callBack?: (error: any) => void){
         ApiService.errorTrackList.push(error);
         if(callBack){
-                callBack(error);
+            callBack(error);
         } else if(error.response && error.response.data && error.response.data.message) {
             if (error.response.data.message === "Invalid Authtoken") {
                 CookieService.clearAll();
             }else{
-                MessageService.openError(error.response.data.message);
+                MessageService.error(error.response.data.message);
             }
         }
     },
-    executeTrackerList: async function(dispatch, trackerList){
-        return await  _.map(trackerList, async (apiTracker)=>{
-            let response = undefined;
+
+    executeTrackerList: async function(_dispatch: any, trackerList: ApiTracker[]){
+        return await _.map(trackerList, async (apiTracker) => {
             if(apiTracker.method === 'GET'){
-                return await ApiService.get(dispatch, apiTracker.url, apiTracker.config.params, apiTracker.failureCallback);
-                // response = await axios.get(apiTracker.url, apiTracker.config);
+                return await ApiService.get(_dispatch, apiTracker.url, apiTracker.config.params, apiTracker.failureCallback);
             }else if(apiTracker.method === 'POST'){
-                return await ApiService.post(dispatch, apiTracker.url, apiTracker.config.data, apiTracker.config.params, apiTracker.failureCallback);
-                // response = await axios.post(apiTracker.url, apiTracker.data, apiTracker.config);
+                return await ApiService.post(_dispatch, apiTracker.url, apiTracker.config.data, apiTracker.config.params, apiTracker.failureCallback);
             }else if(apiTracker.method === 'PUT'){
-                return await ApiService.put(dispatch, apiTracker.url, apiTracker.data, apiTracker.config, apiTracker.failureCallback);
-                // response = await axios.put(apiTracker.url, apiTracker.data, apiTracker.config);
+                return await ApiService.put(_dispatch, apiTracker.url, apiTracker.data, apiTracker.config, apiTracker.failureCallback);
             }else if(apiTracker.method === 'DELETE'){
-                return await ApiService.delete(dispatch, apiTracker.url, apiTracker.config, apiTracker.failureCallback);
-                // response = await axios.post(apiTracker.url, apiTracker.config);
+                return await ApiService.delete(_dispatch, apiTracker.url, apiTracker.config, apiTracker.failureCallback);
             }
-            return response;
+            return undefined;
         });
     }
 }
+
 export default ApiService;

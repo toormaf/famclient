@@ -7,13 +7,13 @@ const MessageService = {
     error: (content:string, duration = ERROR_MESSAGE_TIMING)=>{
         message.error({key:content, type:'error', content: <div className="flexr-sb gap15">
             {content}
-            <Aicon.CloseOutlined className="txt12" onClick={e => message.destroy()}/>
+            <Aicon.CloseOutlined className="txt12" onClick={() => message.destroy()}/>
         </div>, duration: duration});
     },
     success: (content:string, duration = ERROR_MESSAGE_TIMING)=>{
         message.success({key:content, type:'error', content: <div className="flexr-sb gap15">
             {content}
-            <Aicon.CloseOutlined className="txt12" onClick={e => message.destroy()}/>
+            <Aicon.CloseOutlined className="txt12" onClick={() => message.destroy()}/>
         </div>, duration: duration});
     },
     setConfig: (config:any)=>{
