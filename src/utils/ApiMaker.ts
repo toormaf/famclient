@@ -22,6 +22,7 @@ export interface ApiMakerConfig {
 export class ApiMaker {
   private axiosInstance: AxiosInstance;
   private cache: LRUCache<string, any>;
+  private pendingRequests: Map<string, Promise<any>> = new Map();
   private requestLogs: ApiLogEntry[] = [];
   private stats: ApiStats = {
     totalRequests: 0,
@@ -223,6 +224,32 @@ export class ApiMaker {
       };
     }
 
+    if (method === 'GET' && this.pendingRequests.has(cacheKey)) {
+      console.log(`[ApiMaker] Request deduplication: waiting for in-flight request to ${url}`);
+      const pendingRequest = this.pendingRequests.get(cacheKey)!;
+      return pendingRequest;
+    }
+
+    const requestPromise = this.executeRequest<T>(url, config, cacheKey, method, enableCache, cacheTTL);
+
+    if (method === 'GET') {
+      this.pendingRequests.set(cacheKey, requestPromise);
+      requestPromise.finally(() => {
+        this.pendingRequests.delete(cacheKey);
+      });
+    }
+
+    return requestPromise;
+  }
+
+  private async executeRequest<T = any>(
+    url: string,
+    config: ApiConfig,
+    cacheKey: string,
+    method: string,
+    enableCache: boolean,
+    cacheTTL: number
+  ): Promise<ApiResponse<T>> {
     const startTime = Date.now();
 
     try {
@@ -324,6 +351,14 @@ export class ApiMaker {
   clearCache(): void {
     this.cache.clear();
     console.log('[ApiMaker] Cache cleared');
+  }
+
+  getPendingRequestsCount(): number {
+    return this.pendingRequests.size;
+  }
+
+  getPendingRequests(): string[] {
+    return Array.from(this.pendingRequests.keys());
   }
 
   getCacheStats() {

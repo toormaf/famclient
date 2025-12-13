@@ -1,30 +1,36 @@
 # ApiMaker - Advanced API Management System
 
-A comprehensive API management solution with LRU caching, request tracking, cookie-based preferences, and Supabase integration for your Famroot application.
+A comprehensive API management solution with LRU caching, request deduplication, cookie-based preferences, and Supabase integration for your Famroot application.
 
 ## Features
 
-### 1. LRU (Least Recently Used) Caching
+### 1. Request Deduplication (Mutex Lock)
+- **Automatic deduplication** of simultaneous GET requests to the same URL
+- Multiple modules requesting the same endpoint will share a single HTTP request
+- Prevents redundant network calls and reduces server load
+- Significantly improves performance in multi-component applications
+
+### 2. LRU (Least Recently Used) Caching
 - Configurable cache pool size
 - Automatic cache eviction when pool is full
 - Per-request cache TTL (Time To Live)
 - Cache hit/miss tracking
 - Manual cache control methods
 
-### 2. Cookie Storage
+### 3. Cookie Storage
 - Secure cookie management for user preferences
 - Authentication token storage
 - Automatic token injection in requests
 - Persistent user preferences across sessions
 
-### 3. API Request Tracking
+### 4. API Request Tracking
 - All API calls logged to Supabase database
 - Response time monitoring
 - Error tracking
 - Cache performance metrics
 - Request/response payload logging
 
-### 4. Axios Integration
+### 5. Axios Integration
 - Full Axios feature support
 - Request/response interceptors
 - Custom headers management
@@ -40,23 +46,6 @@ npm install axios
 
 ## Quick Start
 
-### Basic Usage
-
-```typescript
-import { api, authApi, userApi } from '../utils/api';
-
-const loginUser = async (email: string, password: string) => {
-  try {
-    const response = await authApi.login({ email, password });
-    console.log('Login successful:', response.data);
-
-    api.setAuthToken(response.data.token);
-  } catch (error) {
-    console.error('Login failed:', error);
-  }
-};
-```
-
 ### Initialize with Supabase
 
 ```typescript
@@ -69,6 +58,37 @@ const supabase = createClient(
 );
 
 initializeApi(supabase);
+```
+
+### Basic Usage - Single API Instance
+
+**IMPORTANT**: Use the shared `api` instance across all modules for automatic request deduplication.
+
+```typescript
+import { api, API_ENDPOINTS } from '../utils/api';
+
+const loginUser = async (email: string, password: string) => {
+  try {
+    const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, {
+      email,
+      password,
+    }, { cache: false });
+
+    api.setAuthToken(response.data.token);
+    return response.data;
+  } catch (error) {
+    console.error('Login failed:', error);
+    throw error;
+  }
+};
+
+const getUserProfile = async () => {
+  const response = await api.get(API_ENDPOINTS.USER.PROFILE, {
+    cache: true,
+    cacheTTL: 10 * 60 * 1000,
+  });
+  return response.data;
+};
 ```
 
 ## Core Components
@@ -196,114 +216,48 @@ const response = await api.get('/users', {
 });
 ```
 
-## Pre-built API Modules
+## Request Deduplication (Mutex Lock)
 
-### Authentication API
+When multiple components or modules make the same GET request simultaneously, ApiMaker automatically deduplicates them:
 
 ```typescript
-import { authApi } from '../utils/api';
+import { api, API_ENDPOINTS } from '../utils/api';
 
-await authApi.login({ email, password });
+const Component1 = () => {
+  useEffect(() => {
+    api.get(API_ENDPOINTS.USER.PROFILE);
+  }, []);
+};
 
-await authApi.register(userData);
+const Component2 = () => {
+  useEffect(() => {
+    api.get(API_ENDPOINTS.USER.PROFILE);
+  }, []);
+};
 
-await authApi.logout();
-
-await authApi.refreshToken();
-
-await authApi.forgotPassword(email);
-
-await authApi.resetPassword(token, newPassword);
+const Component3 = () => {
+  useEffect(() => {
+    api.get(API_ENDPOINTS.USER.PROFILE);
+  }, []);
+};
 ```
 
-### User API
+**Result**: Only **1 HTTP request** is made, and all three components receive the same response.
 
-```typescript
-import { userApi } from '../utils/api';
-
-const profile = await userApi.getProfile();
-
-await userApi.updateProfile({ name: 'John' });
-
-const prefs = await userApi.getPreferences();
-
-await userApi.deleteAccount();
+Console output:
+```
+[ApiMaker] Request deduplication: waiting for in-flight request to /user/profile
+[ApiMaker] Request deduplication: waiting for in-flight request to /user/profile
 ```
 
-### Family API
+### Monitoring Pending Requests
 
 ```typescript
-import { familyApi } from '../utils/api';
+import { api } from '../utils/api';
 
-const tree = await familyApi.getTree();
+console.log('Pending requests:', api.getPendingRequestsCount());
 
-const members = await familyApi.getMembers();
-
-await familyApi.addMember(memberData);
-
-await familyApi.updateMember(memberId, data);
-
-await familyApi.deleteMember(memberId);
-
-const connections = await familyApi.getConnections();
-```
-
-### Chat API
-
-```typescript
-import { chatApi } from '../utils/api';
-
-const messages = await chatApi.getMessages(conversationId);
-
-await chatApi.sendMessage(conversationId, message);
-
-const conversations = await chatApi.getConversations();
-
-await chatApi.createConversation(participantIds);
-```
-
-### Vault API
-
-```typescript
-import { vaultApi } from '../utils/api';
-
-const documents = await vaultApi.getDocuments();
-
-const formData = new FormData();
-formData.append('file', file);
-await vaultApi.uploadDocument(formData);
-
-await vaultApi.downloadDocument(documentId);
-
-await vaultApi.deleteDocument(documentId);
-```
-
-### Maps API
-
-```typescript
-import { mapsApi } from '../utils/api';
-
-const locations = await mapsApi.getLocations();
-
-await mapsApi.addLocation(locationData);
-
-await mapsApi.updateLocation(locationId, data);
-
-await mapsApi.deleteLocation(locationId);
-```
-
-### Notes API
-
-```typescript
-import { notesApi } from '../utils/api';
-
-const notes = await notesApi.getAllNotes();
-
-await notesApi.createNote(noteData);
-
-await notesApi.updateNote(noteId, data);
-
-await notesApi.deleteNote(noteId);
+console.log('Request keys:', api.getPendingRequests());
 ```
 
 ## Advanced Features
@@ -533,7 +487,7 @@ if (logs.length === 0) {
 
 ## Examples
 
-See the pre-built API modules in `src/utils/api.ts` for complete implementation examples.
+See `USAGE_EXAMPLES.md` in the project root for comprehensive usage examples across all modules.
 
 ## Support
 
