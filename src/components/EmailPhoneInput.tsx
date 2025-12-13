@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Input } from 'antd';
-import { MailOutlined, PhoneOutlined } from '@ant-design/icons';
+import { UserOutlined } from '@ant-design/icons';
 import { isValidPhoneNumber, getCountries, getCountryCallingCode } from 'libphonenumber-js';
 import Select from './Select';
 
@@ -107,11 +107,6 @@ function EmailPhoneInput({
     }
   };
 
-  const getIcon = () => {
-    if (inputType === 'email') return <MailOutlined />;
-    if (inputType === 'phone') return <PhoneOutlined />;
-    return <MailOutlined />;
-  };
 
   const getPlaceholder = () => {
     if (inputType === 'email') return 'Enter your email';
@@ -123,7 +118,7 @@ function EmailPhoneInput({
 
   return (
     <div className="email-phone-input-container">
-      <div className="flex items-center gap-2 relative">
+      <div className={`flex items-center ${showCountryPicker ? 'gap-2' : ''} relative`}>
         <div
           className={`country-picker-wrapper ${showCountryPicker ? 'show' : ''}`}
           style={{
@@ -161,7 +156,7 @@ function EmailPhoneInput({
             placeholder={getPlaceholder()}
             disabled={disabled}
             status={inputValue && !isValid ? 'error' : ''}
-            prefix={getIcon()}
+            prefix={<UserOutlined className='text-grey'/>}
             style={{
               transition: 'all 0.3s ease',
             }}

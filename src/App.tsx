@@ -1,15 +1,22 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, HashRouter } from 'react-router-dom';
 import { Spin } from 'antd';
 
 const Landing = lazy(() => import('./pages/Landing'));
-const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
 const Home = lazy(() => import('./pages/modules/Home'));
 const Connects = lazy(() => import('./pages/modules/Connects'));
 const Chat = lazy(() => import('./pages/modules/Chat'));
 const Vault = lazy(() => import('./pages/modules/Vault'));
 const Notes = lazy(() => import('./pages/modules/Notes'));
 const Maps = lazy(() => import('./pages/modules/Maps'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Profile = lazy(() => import('./pages/Profile'));
+
+// const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
+
+function UA(props:any){return (<>{props.children}</>)}
+function A(props:any){return (<>{props.children}</>)}
+function FamrootLayout(props:any){return (<>{props.children}</>)}
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -19,23 +26,24 @@ const LoadingFallback = () => (
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<Navigate to="/dashboard/home" replace />} />
-            <Route path="home" element={<Home />} />
-            <Route path="connects" element={<Connects />} />
-            <Route path="chat" element={<Chat />} />
-            <Route path="vault" element={<Vault />} />
-            <Route path="notes" element={<Notes />} />
-            <Route path="maps" element={<Maps />} />
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/"                 element={<UA><Landing show="login"/></UA>}/>
+          <Route path="/login"            element={<UA><Landing show="login"/></UA>}/>
+          <Route path="/signup"           element={<UA><Landing show="signup"/></UA>}/>
+          <Route path="/reset-password"   element={<UA><Landing show="reset-password"/></UA>}/>
+          <Route path="/home/*"           element={<A ><FamrootLayout><Home/></FamrootLayout></A>}/>
+          <Route path="/connects/*"       element={<A ><FamrootLayout><Connects/></FamrootLayout></A>}/>
+          <Route path="/chats"            element={<A ><FamrootLayout><Chat/></FamrootLayout></A>}/>
+          <Route path="/vault"            element={<A ><FamrootLayout><Vault/></FamrootLayout></A>}/>
+          <Route path="/notes"            element={<A ><FamrootLayout><Notes/></FamrootLayout></A>}/>
+          <Route path="/maps"             element={<A ><FamrootLayout><Maps/></FamrootLayout></A>}/>
+          <Route path="/settings/*"       element={<A ><FamrootLayout><Settings/></FamrootLayout></A>}/>
+          <Route path="/profile/*"        element={<A ><FamrootLayout><Profile/></FamrootLayout></A>}/>
         </Routes>
       </Suspense>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 

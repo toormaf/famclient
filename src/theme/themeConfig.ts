@@ -2,7 +2,7 @@ import type { ThemeConfig } from 'antd';
 
 const themeConfig: ThemeConfig = {
   token: {
-    colorPrimary: '#1677ff',
+    colorPrimary: '#0baf85',
     colorSuccess: '#52c41a',
     colorWarning: '#faad14',
     colorError: '#ff4d4f',
@@ -19,11 +19,13 @@ const themeConfig: ThemeConfig = {
   },
   components: {
     Button: {
-      controlHeight: 36,
+      controlHeight: 32,
       fontWeight: 500,
+      borderRadius: 3,
     },
     Input: {
       controlHeight: 36,
+      borderRadius: 4
     },
     Select: {
       controlHeight: 36,
