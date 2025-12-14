@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { DatePicker } from "antd";
-import dayjs from "dayjs";
 import * as $ from "jquery";
+import dayjs from "dayjs";
 import moment from "moment";
 import OutsideClickHandler from "../utils/OutsideClickHandler";
 
 
-const SmartDateInput = (props) => {
+const DateTimeInput = (props) => {
 
     const D_FORMAT = "DD";
     const M_FORMAT = "MM";
@@ -282,4 +282,4 @@ const SmartDateInput = (props) => {
     );
 };
 
-export default SmartDateInput;
+export default DateTimeInput;
