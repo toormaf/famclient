@@ -1,0 +1,427 @@
+.tour-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.gremlin-guide-container {
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  gap: 20px;
+  animation: slideIn 0.5s ease-out;
+  pointer-events: all;
+}
+
+.gremlin-character {
+  width: 120px;
+  height: 180px;
+  position: relative;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+.gremlin-character.excited {
+  animation: jump 0.5s ease-out;
+}
+
+.gremlin-character.thinking {
+  animation: think 1s ease-in-out;
+}
+
+.gremlin-body {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.gremlin-ears {
+  position: absolute;
+  top: 10px;
+  width: 100%;
+}
+
+.ear {
+  position: absolute;
+  width: 25px;
+  height: 35px;
+  background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
+  border-radius: 50% 50% 0 0;
+  border: 2px solid #5a3415;
+}
+
+.ear.left {
+  left: 10px;
+  transform: rotate(-20deg);
+  animation: wiggleLeft 3s ease-in-out infinite;
+}
+
+.ear.right {
+  right: 10px;
+  transform: rotate(20deg);
+  animation: wiggleRight 3s ease-in-out infinite;
+}
+
+.gremlin-head {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #9B6B3F 0%, #7A4F2E 100%);
+  border-radius: 50%;
+  border: 3px solid #5a3415;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.gremlin-eyes {
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.eye {
+  width: 22px;
+  height: 28px;
+  background: white;
+  border-radius: 50%;
+  position: relative;
+  border: 2px solid #333;
+  animation: blink 4s ease-in-out infinite;
+}
+
+.pupil {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #1a1a1a;
+  border-radius: 50%;
+  top: 8px;
+  left: 5px;
+  animation: lookAround 5s ease-in-out infinite;
+}
+
+.gremlin-mouth {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 15px;
+  border: 2px solid #333;
+  border-top: none;
+  border-radius: 0 0 50% 50%;
+  background: #654321;
+  animation: smile 3s ease-in-out infinite;
+}
+
+.gremlin-body-main {
+  position: absolute;
+  top: 95px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 65px;
+  height: 50px;
+  background: linear-gradient(135deg, #8B5A3C 0%, #6B442D 100%);
+  border-radius: 40% 40% 50% 50%;
+  border: 2px solid #5a3415;
+}
+
+.gremlin-arms {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.arm {
+  position: absolute;
+  width: 15px;
+  height: 40px;
+  background: linear-gradient(135deg, #9B6B3F 0%, #7A4F2E 100%);
+  border-radius: 20px;
+  border: 2px solid #5a3415;
+}
+
+.arm.left {
+  left: -12px;
+  top: 5px;
+  transform: rotate(-30deg);
+  animation: waveLeft 2s ease-in-out infinite;
+}
+
+.arm.right {
+  right: -12px;
+  top: 5px;
+  transform: rotate(30deg);
+  animation: waveRight 2s ease-in-out infinite;
+}
+
+.gremlin-legs {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.leg {
+  width: 20px;
+  height: 35px;
+  background: linear-gradient(135deg, #9B6B3F 0%, #7A4F2E 100%);
+  border-radius: 10px 10px 50% 50%;
+  border: 2px solid #5a3415;
+}
+
+.tour-bubble {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  width: 320px;
+  position: relative;
+  animation: popIn 0.3s ease-out;
+}
+
+.tour-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #999;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.tour-close:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.tour-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin: 0 0 12px 0;
+}
+
+.tour-content {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+  margin: 0 0 20px 0;
+}
+
+.tour-progress {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ddd;
+  transition: all 0.3s;
+}
+
+.progress-dot.active {
+  background: #7CB342;
+  transform: scale(1.3);
+}
+
+.progress-dot.completed {
+  background: #4CAF50;
+}
+
+.tour-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.tour-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tour-btn-primary {
+  background: #7CB342;
+  color: white;
+}
+
+.tour-btn-primary:hover {
+  background: #689F38;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+}
+
+.tour-btn-secondary {
+  background: #f0f0f0;
+  color: #555;
+}
+
+.tour-btn-secondary:hover {
+  background: #e0e0e0;
+}
+
+.tour-highlight {
+  position: relative;
+  z-index: 9997;
+  box-shadow: 0 0 0 4px rgba(124, 179, 66, 0.5), 0 0 20px rgba(124, 179, 66, 0.3) !important;
+  border-radius: 8px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes jump {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-30px);
+  }
+}
+
+@keyframes think {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-5deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+}
+
+@keyframes blink {
+  0%, 90%, 100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes lookAround {
+  0%, 100% {
+    left: 5px;
+  }
+  25% {
+    left: 8px;
+  }
+  75% {
+    left: 2px;
+  }
+}
+
+@keyframes smile {
+  0%, 100% {
+    width: 30px;
+  }
+  50% {
+    width: 35px;
+  }
+}
+
+@keyframes waveLeft {
+  0%, 100% {
+    transform: rotate(-30deg);
+  }
+  50% {
+    transform: rotate(-60deg);
+  }
+}
+
+@keyframes waveRight {
+  0%, 100% {
+    transform: rotate(30deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+}
+
+@keyframes wiggleLeft {
+  0%, 100% {
+    transform: rotate(-20deg);
+  }
+  50% {
+    transform: rotate(-25deg);
+  }
+}
+
+@keyframes wiggleRight {
+  0%, 100% {
+    transform: rotate(20deg);
+  }
+  50% {
+    transform: rotate(25deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px rgba(124, 179, 66, 0.5), 0 0 20px rgba(124, 179, 66, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(124, 179, 66, 0.3), 0 0 30px rgba(124, 179, 66, 0.5);
+  }
+}
