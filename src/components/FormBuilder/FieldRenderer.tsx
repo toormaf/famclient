@@ -18,9 +18,10 @@ const { Option } = Select;
 
 interface FieldRendererProps {
   config: FieldConfig;
+  form?: any;
 }
 
-export const FieldRenderer: React.FC<FieldRendererProps> = ({ config }) => {
+export const FieldRenderer: React.FC<FieldRendererProps> = ({ config, form }) => {
   const {
     type,
     placeholder,
@@ -213,6 +214,12 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({ config }) => {
 
     case 'switch':
       return <Switch disabled={disabled} />;
+
+    case 'custom':
+      if (config.render && form) {
+        return config.render(config, form);
+      }
+      return null;
 
     default:
       return <Input {...commonProps} />;

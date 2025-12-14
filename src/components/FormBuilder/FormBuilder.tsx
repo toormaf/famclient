@@ -29,6 +29,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     size = 'middle',
     className,
     style,
+    submitButtonAlign = 'left',
   } = config;
 
   const handleSubmit = async (values: any) => {
@@ -51,8 +52,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     return 24 / columns;
   };
 
-  const renderField = (field: any) => {
+  const renderField = (field: any, formValues: any) => {
     if (field.hidden) return null;
+
+    if (field.visibleWhen && !field.visibleWhen(formValues)) {
+      return null;
+    }
 
     const rules = getFieldRules(field);
     const colSpan = getColSpan(field.span);
@@ -82,10 +87,21 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           valuePropName={field.type === 'checkbox' || field.type === 'switch' ? 'checked' : 'value'}
           validateFirst
         >
-          <FieldRenderer config={field} />
+          <FieldRenderer config={field} form={form} />
         </Form.Item>
       </Col>
     );
+  };
+
+  const getSubmitButtonStyle = () => {
+    switch (submitButtonAlign) {
+      case 'center':
+        return { justifyContent: 'center', display: 'flex' };
+      case 'right':
+        return { justifyContent: 'flex-end', display: 'flex' };
+      default:
+        return {};
+    }
   };
 
   return (
@@ -104,13 +120,20 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
       scrollToFirstError
       validateTrigger={['onChange', 'onBlur']}
     >
-      <Row gutter={[16, 0]}>
-        {fields.map((field) => renderField(field))}
-      </Row>
+      <Form.Item noStyle shouldUpdate>
+        {() => {
+          const formValues = form.getFieldsValue();
+          return (
+            <Row gutter={[16, 0]}>
+              {fields.map((field) => renderField(field, formValues))}
+            </Row>
+          );
+        }}
+      </Form.Item>
 
       {children}
 
-      <Form.Item className="form-actions">
+      <Form.Item className="form-actions" style={getSubmitButtonStyle()}>
         <Space size="middle">
           <Button
             type="primary"

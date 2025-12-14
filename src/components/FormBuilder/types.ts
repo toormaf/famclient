@@ -15,7 +15,8 @@ export type FieldType =
   | 'datetime'
   | 'checkbox'
   | 'radio'
-  | 'switch';
+  | 'switch'
+  | 'custom';
 
 export type LayoutType = 'vertical' | 'horizontal' | 'inline';
 
@@ -34,6 +35,7 @@ export interface FieldConfig {
   required?: boolean;
   disabled?: boolean;
   hidden?: boolean;
+  visibleWhen?: (formValues: any) => boolean;
   prefix?: ReactNode;
   suffix?: ReactNode;
   icon?: ReactNode;
@@ -61,6 +63,7 @@ export interface FieldConfig {
   format?: string;
   formatValue?: string;
   change?: (value: any) => void;
+  render?: (config: FieldConfig, formInstance: any) => ReactNode;
 }
 
 export interface FormConfig {
@@ -72,6 +75,7 @@ export interface FormConfig {
   size?: 'small' | 'middle' | 'large';
   className?: string;
   style?: React.CSSProperties;
+  submitButtonAlign?: 'left' | 'center' | 'right';
 }
 
 export interface FormBuilderProps {
