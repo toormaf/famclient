@@ -718,21 +718,53 @@ function Chat() {
           createChatForm.resetFields();
         }}
         okText="Create"
+        cancelText="Cancel"
       >
-        <Form form={createChatForm} layout="vertical" className="mt-4">
+        <Form
+          form={createChatForm}
+          layout="vertical"
+          className="mt-4"
+          validateTrigger={['onBlur', 'onSubmit']}
+        >
           <Form.Item
             name="name"
             label="Chat Name"
-            rules={[{ required: true, message: 'Please enter a chat name' }]}
+            rules={[
+              { required: true, message: 'Please enter a chat name' },
+              { min: 3, message: 'Chat name must be at least 3 characters' },
+              { max: 50, message: 'Chat name must be less than 50 characters' }
+            ]}
+            validateTrigger={['onBlur', 'onChange']}
           >
-            <Input placeholder="Enter chat name" />
+            <Input
+              placeholder="Enter chat name"
+              size="large"
+            />
           </Form.Item>
           <Form.Item
             name="participants"
             label="Participants (User IDs)"
-            help="Enter user IDs separated by commas"
+            rules={[
+              {
+                validator: (_, value) => {
+                  if (!value || !value.trim()) {
+                    return Promise.resolve();
+                  }
+                  const ids = value.split(',').map((id: string) => id.trim()).filter((id: string) => id);
+                  if (ids.length === 0) {
+                    return Promise.reject(new Error('Please enter at least one valid participant ID'));
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
+            validateTrigger={['onBlur', 'onChange']}
+            help="Enter user IDs separated by commas (optional for personal chats)"
           >
-            <Input placeholder="user-id-1, user-id-2" />
+            <Input
+              placeholder="user-id-1, user-id-2"
+              size="large"
+            />
           </Form.Item>
         </Form>
       </Modal>
