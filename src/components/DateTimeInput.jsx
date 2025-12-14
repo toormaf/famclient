@@ -3,7 +3,7 @@ import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import * as $ from "jquery";
 import moment from "moment";
-import OutsideClickHandler from "react-outside-click-handler";
+import OutsideClickHandler from "../utils/OutsideClickHandler";
 
 
 const SmartDateInput = (props) => {

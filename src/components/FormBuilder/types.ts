@@ -12,6 +12,7 @@ export type FieldType =
   | 'textarea'
   | 'number'
   | 'date'
+  | 'datetime'
   | 'checkbox'
   | 'radio'
   | 'switch';
@@ -57,6 +58,9 @@ export interface FieldConfig {
   autoComplete?: string;
   mode?: 'multiple' | 'tags';
   span?: number;
+  format?: string;
+  formatValue?: string;
+  change?: (value: any) => void;
 }
 
 export interface FormConfig {

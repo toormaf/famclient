@@ -11,6 +11,7 @@ import {
 import { FieldConfig } from './types';
 import { buildFieldRules } from './validators';
 import * as Icons from '@ant-design/icons';
+import EmailPhoneInput from '../EmailPhoneInput';
 
 const { TextArea, Password } = Input;
 const { Option } = Select;
@@ -102,11 +103,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({ config }) => {
 
     case 'emailOrMobile':
       return (
-        <Input
+        <EmailPhoneInput
           {...commonProps}
-          prefix={renderPrefix || <Icons.UserOutlined />}
-          suffix={renderSuffix}
-          maxLength={maxLength}
           placeholder={placeholder || 'Email or Mobile Number'}
         />
       );
@@ -183,6 +181,16 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({ config }) => {
           {...commonProps}
           style={{ width: '100%' }}
           format="YYYY-MM-DD"
+        />
+      );
+
+    case 'datetime':
+      return (
+        <DatePicker
+          {...commonProps}
+          showTime
+          style={{ width: '100%' }}
+          format="YYYY-MM-DD HH:mm:ss"
         />
       );
 

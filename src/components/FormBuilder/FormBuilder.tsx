@@ -80,6 +80,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           style={field.style}
           initialValue={field.defaultValue}
           valuePropName={field.type === 'checkbox' || field.type === 'switch' ? 'checked' : 'value'}
+          validateFirst
         >
           <FieldRenderer config={field} />
         </Form.Item>
