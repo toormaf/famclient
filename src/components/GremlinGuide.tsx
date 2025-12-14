@@ -16,39 +16,45 @@ interface GremlinGuideProps {
 
 const tourSteps: TourStep[] = [
   {
-    target: '.home-section',
+    target: '.layout-side-menu',
     title: 'Welcome to Famroot!',
-    content: 'Hi! I\'m your friendly guide. Let me show you around your family connection hub!',
-    position: 'bottom'
-  },
-  {
-    target: '.chat-section',
-    title: 'Chat with Family',
-    content: 'Stay connected with your family members through our chat feature. Send messages, share moments!',
+    content: 'Hi! I\'m your friendly gremlin guide. Let me show you around your family connection hub!',
     position: 'right'
   },
   {
-    target: '.connects-section',
+    target: '.layout-side-menu li[data-menu-id$="home"]',
+    title: 'Your Home Dashboard',
+    content: 'This is your home base! See all your family activities and updates in one place.',
+    position: 'right'
+  },
+  {
+    target: '.layout-side-menu li[data-menu-id$="connects"]',
     title: 'Family Connections',
-    content: 'View and manage your family tree connections. Add new members and see relationships!',
+    content: 'View and manage your family tree connections. Add new members and discover relationships!',
     position: 'right'
   },
   {
-    target: '.maps-section',
-    title: 'Family Map',
-    content: 'See where your family members are located around the world!',
+    target: '.layout-side-menu li[data-menu-id$="chats"]',
+    title: 'Chat with Family',
+    content: 'Stay connected with your family members. Send messages and share precious moments!',
     position: 'right'
   },
   {
-    target: '.notes-section',
-    title: 'Family Notes',
-    content: 'Keep important family notes, memories, and information all in one place!',
-    position: 'right'
-  },
-  {
-    target: '.vault-section',
+    target: '.layout-side-menu li[data-menu-id$="vault"]',
     title: 'Family Vault',
-    content: 'Securely store important family documents and precious memories!',
+    content: 'Securely store important family documents, photos, and precious memories!',
+    position: 'right'
+  },
+  {
+    target: '.layout-side-menu li[data-menu-id$="notes"]',
+    title: 'Family Notes',
+    content: 'Keep important family notes, stories, and information all organized in one place!',
+    position: 'right'
+  },
+  {
+    target: '.layout-side-menu li[data-menu-id$="maps"]',
+    title: 'Family Map',
+    content: 'See where your family members are located around the world. Stay connected across distances!',
     position: 'right'
   }
 ];
