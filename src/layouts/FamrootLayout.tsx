@@ -1,4 +1,4 @@
-import { Avatar, Badge, Drawer, Dropdown, Image, Layout, Menu } from "antd";
+import { Avatar, Drawer, Dropdown, Image, Layout, Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
 import * as Aicon from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +25,6 @@ const FamrootLayout = (props:any)=>{
     const [dp, setDp]:any = useState(undefined);
 
     const [drawerVisible, setDrawerVisible] = useState(false);
-    const showDrawer = () => {setDrawerVisible(true);};
     const closeDrawer = () => {setDrawerVisible(false);};
 
     useEffect(() => {
