@@ -1,4 +1,4 @@
-import { Avatar, Drawer, Dropdown, Image, Layout, Menu } from "antd";
+import { Avatar, Button, Drawer, Dropdown, Image, Layout, Menu, Tooltip } from "antd";
 import Sider from "antd/es/layout/Sider";
 import * as Aicon from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +6,7 @@ import { Content, Header } from "antd/es/layout/layout";
 import Logo from "../components/Logo";
 import AccountService from "../services/Account.service";
 import { useEffect, useState } from "react";
+import { GremlinGuide } from "../components";
 
 const sideMenuItems = [
     {key: "home", icon: <Aicon.DashboardOutlined />, label: "Home"},
@@ -21,6 +22,7 @@ const sideMenuItems = [
 
 const FamrootLayout = (props:any)=>{
 
+    const [showTourGuide, setShowTourGuide] = useState(false);
     const [basic, setBasic]:any=useState(undefined);
     const [dp, setDp]:any = useState(undefined);
 
@@ -88,6 +90,22 @@ const FamrootLayout = (props:any)=>{
                     <Mobile>
                         <Aicon.SearchOutlined className="txt20"/>
                     </Mobile> */}
+                    <Tooltip title="Start Tour Guide">
+                        <Button
+                        type="primary"
+                        shape="circle"
+                        size="large"
+                        icon={<Aicon.QuestionCircleOutlined />}
+                        onClick={() => setShowTourGuide(true)}
+                        style={{
+                            background: '#7CB342',
+                            borderColor: '#7CB342',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                        />
+                    </Tooltip>
                     <Aicon.SettingOutlined className="txt20" onClick={()=>handleMenuSwitch({key:'settings'})}/>
                     {/* <Badge size="small" count={unreadNotificationCount}>
                         <Aicon.BellOutlined className="txt20" onClick={showDrawer} /> 
@@ -111,6 +129,8 @@ const FamrootLayout = (props:any)=>{
                     </Content>
                 </Layout>
             </Layout>
+            <GremlinGuide isVisible={showTourGuide} onClose={() => setShowTourGuide(false)}/>
+
         </Layout>
     );
 }

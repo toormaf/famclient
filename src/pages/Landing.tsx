@@ -133,7 +133,7 @@ function Landing(props:any) {
                   }
                 }
               ]}
-              validateTrigger={['onBlur', 'onChange']}
+              validateTrigger={['onBlur']}
               className="mb-8"
             >
               <EmailPhoneInput
@@ -153,9 +153,9 @@ function Landing(props:any) {
                 name="password"
                 rules={[
                   { required: true, message: 'Please enter your password' },
-                  { min: 6, message: 'Password must be at least 6 characters' }
+                  { min: 3, message: 'Password must be at least 6 characters' }
                 ]}
-                validateTrigger={['onBlur', 'onChange']}
+                validateTrigger={['onBlur']}
                 className="mb-8"
               >
                 <Input.Password
@@ -166,7 +166,6 @@ function Landing(props:any) {
                   }}
                   prefix={<Icons.KeyOutline className='text-grey'/>}
                   placeholder="Enter your password"
-                  size="large"
                 />
               </Form.Item>
             }
@@ -179,7 +178,7 @@ function Landing(props:any) {
                   { len: 6, message: 'OTP must be 6 digits' },
                   { pattern: /^\d+$/, message: 'OTP must contain only numbers' }
                 ]}
-                validateTrigger={['onBlur', 'onChange']}
+                validateTrigger={['onBlur']}
                 className="mb-8"
               >
                 <Input
@@ -191,7 +190,6 @@ function Landing(props:any) {
                   prefix={<Icons.KeyOutline className='text-grey'/>}
                   placeholder="Enter 6-digit OTP"
                   maxLength={6}
-                  size="large"
                 />
               </Form.Item>
             }
@@ -205,7 +203,7 @@ function Landing(props:any) {
             }
 
             <Form.Item className="mb-0 flex justify-center">
-              <Button type="primary" htmlType="submit" onClick={handleAuth} size="large">
+              <Button type="primary" htmlType="submit" onClick={handleAuth}>
                 {view == "login" && <>Login Now</>}
                 {view == "signup" && <>Continue & Send OTP</>}
                 {view == "reset-password" && <>Send Verification Code</>}
