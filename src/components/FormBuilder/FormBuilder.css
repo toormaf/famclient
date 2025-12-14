@@ -91,30 +91,11 @@
 }
 
 .form-builder .ant-btn {
-  font-weight: 500;
-  border-radius: 6px;
   transition: all 0.3s ease;
-}
-
-.form-builder .ant-btn-primary {
-  background: #1890ff;
-  border-color: #1890ff;
-}
-
-.form-builder .ant-btn-primary:hover {
-  background: #40a9ff;
-  border-color: #40a9ff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
 }
 
 .form-builder .ant-btn-primary:active {
   transform: translateY(0);
-}
-
-.form-builder .ant-btn-default:hover {
-  border-color: #40a9ff;
-  color: #40a9ff;
 }
 
 @media (max-width: 768px) {
