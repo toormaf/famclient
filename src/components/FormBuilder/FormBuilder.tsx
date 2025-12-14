@@ -102,6 +102,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
       className={`form-builder ${className || ''}`}
       style={style}
       scrollToFirstError
+      validateTrigger={['onChange', 'onBlur']}
     >
       <Row gutter={[16, 0]}>
         {fields.map((field) => renderField(field))}

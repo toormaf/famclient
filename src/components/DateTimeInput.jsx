@@ -3,10 +3,19 @@ import { DatePicker } from "antd";
 import * as $ from "jquery";
 import dayjs from "dayjs";
 import moment from "moment";
+import _ from "lodash";
 import OutsideClickHandler from "../utils/OutsideClickHandler";
 
 
-const DateTimeInput = (props) => {
+interface DateTimeInputProps {
+  format?: string;
+  formatValue?: string;
+  value?: string;
+  onChange?: (value: string) => void;
+  change?: (value: string) => void;
+}
+
+const DateTimeInput = (props: DateTimeInputProps) => {
 
     const D_FORMAT = "DD";
     const M_FORMAT = "MM";
@@ -109,8 +118,14 @@ const DateTimeInput = (props) => {
     }
 
     useEffect(() => {
-        props?.change(getOutputValue(formatStructure));
-    }, [D,M,Y,H,m,S]);
+        const outputValue = getOutputValue(formatStructure);
+        if (props?.change) {
+            props.change(outputValue);
+        }
+        if (props?.onChange) {
+            props.onChange(outputValue);
+        }
+    }, [D, M, Y, H, m, S]);
 
     function getNextByClass(currentEl, className) {
         var allMatches = $('.' + className); // all elements with the target class
@@ -168,8 +183,10 @@ const DateTimeInput = (props) => {
         let fstructure = (props.format ? props.format : DEFAULT_FORMAT_STRUCTURE.join("")).split(REGEX);
         setFormatStructure(fstructure);
         setGridCss(getGridCss(fstructure));
-        if(props.formatValue){
-            setInputValue(fstructure, props.formatValue);
+
+        const initialValue = props.value || props.formatValue;
+        if(initialValue){
+            setInputValue(fstructure, initialValue);
         }
 
         // Keyup
@@ -241,8 +258,8 @@ const DateTimeInput = (props) => {
             setFormat(DEFAULT_FORMAT_VALUES[format].FORMAT);
             setOpen(true);
             setTimeout(()=>{
-                $(".ant-picker-cell.ant-picker-cell-selected").off('click').on('click', (e)=>{
-                    debugger
+                $(".ant-picker-cell.ant-picker-cell-selected").off('click').on('click', () => {
+                    // Cell selected
                 })
             }, 200);    
         });

@@ -105,6 +105,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({ config }) => {
       return (
         <EmailPhoneInput
           {...commonProps}
+          prefix={renderPrefix || <Icons.UserOutlined />}
           placeholder={placeholder || 'Email or Mobile Number'}
         />
       );
@@ -188,9 +189,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({ config }) => {
       return (
         <DatePicker
           {...commonProps}
-          showTime
+          showTime={{ format: 'HH:mm:ss' }}
           style={{ width: '100%' }}
-          format="YYYY-MM-DD HH:mm:ss"
+          format={config.format || 'YYYY-MM-DD HH:mm:ss'}
         />
       );
 
