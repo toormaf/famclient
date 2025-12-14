@@ -9,6 +9,8 @@ export default {
       colors:{
         'primary': '#009688',
         'link':'#1677ff',
+        'primary-frame':'#14a07a',
+        'light-frame':'#f5f5f5',
         'grey': '#ccc',
       },
       boxShadow:{

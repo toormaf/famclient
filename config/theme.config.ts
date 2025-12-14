@@ -30,6 +30,29 @@ const themeConfig: ThemeConfig = {
     Select: {
       controlHeight: 36,
     },
+    Layout:{
+      headerBg: "#f5f5f5",
+      headerPadding: '0px 20px',
+      headerHeight: 45,
+      siderBg: '#14a07a',
+    },
+    Menu:{
+      itemBg: 'transparent',
+      itemHeight: 78,
+      itemMarginInline: 0,
+      itemMarginBlock: 'unset',
+      itemPaddingInline: 0,
+      
+      itemColor: '#fff',
+      itemSelectedColor: '#fff',
+      itemHoverColor: '#fff',
+      
+      itemHoverBg: '#0f8867',
+      itemActiveBg: '#0f8867',
+      itemSelectedBg: '#0f8867',
+      iconMarginInlineEnd: 0,
+      itemBorderRadius: 0,
+    },
     Card: {
       borderRadiusLG: 8,
     },

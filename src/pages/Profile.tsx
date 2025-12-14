@@ -1,6 +1,6 @@
 function Profile(){
     return (
-        <div>Settings</div>
+        <div>Profile</div>
     )
 }
 

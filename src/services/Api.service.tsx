@@ -27,6 +27,10 @@ const AInterceptor = {
             }catch(e){
                 console.log(e);
             }
+            if(response?.data?.data?.authToken && response?.data?.data?.tokenType){
+                CookieService.set("authToken", response.data.data.tokenType+" "+response.data.data.authToken); 
+                window.location.reload();
+            }
             return response;
           }, function (error:any) {
             AInterceptor.errorLogger.push(error);
@@ -64,6 +68,7 @@ const ApiService = {
     init: function(){
         AXIOS_INSTANCE = CommonUtil.getNewAxiosInstance(import.meta.env.VITE_API_BASE_URL);
         AInterceptor.init(AXIOS_INSTANCE);
+        return true;
     }, 
 
     getConfig: function(params: any){
