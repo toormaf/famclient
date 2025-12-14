@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Input, Tabs, Badge, Avatar, Dropdown, Typography, Button, Switch, Spin } from 'antd';
+import { Input, Tabs, Badge, Avatar, Dropdown, Typography, Button, Switch, Spin, Modal, Form } from 'antd';
 import {
   SearchOutlined,
   MoreOutlined,
@@ -17,7 +17,9 @@ import {
   ClockCircleOutlined,
   ShareAltOutlined,
   WarningOutlined,
-  CheckCircleTwoTone
+  CheckCircleTwoTone,
+  InfoCircleOutlined,
+  PlayCircleOutlined
 } from '@ant-design/icons';
 import ChatService, { Conversation, Message } from '../../services/Chat.service';
 import moment from 'moment';
@@ -35,6 +37,9 @@ function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [pinnedMessages, setPinnedMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState('');
+  const [showUserInfo, setShowUserInfo] = useState(false);
+  const [showCreateChat, setShowCreateChat] = useState(false);
+  const [createChatForm] = Form.useForm();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const userId = 'current-user-id';
 
@@ -152,6 +157,30 @@ function Chat() {
     loadConversations();
   };
 
+  const handleCreateChat = async () => {
+    try {
+      const values = await createChatForm.validateFields();
+      const participantIds = values.participants
+        ? values.participants.split(',').map((id: string) => id.trim()).filter((id: string) => id)
+        : [];
+      const conversation = await ChatService.createConversation(
+        activeTab,
+        values.name,
+        userId,
+        [userId, ...participantIds]
+      );
+      if (conversation) {
+        setShowCreateChat(false);
+        createChatForm.resetFields();
+        loadConversations();
+        loadCounts();
+        setSelectedConversation(conversation);
+      }
+    } catch (error) {
+      console.error('Error creating chat:', error);
+    }
+  };
+
   const formatTime = (dateString: string) => {
     const date = moment(dateString);
     const now = moment();
@@ -170,6 +199,15 @@ function Chat() {
   };
 
   const getConversationMenuItems = (conversation: Conversation) => [
+    {
+      key: 'show-info',
+      icon: <InfoCircleOutlined />,
+      label: 'Show info',
+      onClick: () => {
+        setSelectedConversation(conversation);
+        setShowUserInfo(true);
+      },
+    },
     {
       key: 'mark-read',
       icon: <EyeOutlined />,
@@ -475,6 +513,7 @@ function Chat() {
             icon={<UsergroupAddOutlined />}
             className="w-full flex items-center justify-center"
             size="large"
+            onClick={() => setShowCreateChat(true)}
           >
             Create new chat or group
           </Button>
@@ -482,7 +521,7 @@ function Chat() {
       </div>
 
       <div className="flex-1 flex flex-col">
-        {selectedConversation ? (
+        {selectedConversation && !showUserInfo ? (
           <>
             <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
               <div className="flex items-center gap-3">
@@ -564,6 +603,103 @@ function Chat() {
               </div>
             </div>
           </>
+        ) : showUserInfo && selectedConversation ? (
+          <div className="flex flex-col h-full bg-white overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <Text strong className="text-xl">User Information</Text>
+              <Dropdown
+                menu={{ items: getConversationMenuItems(selectedConversation) }}
+                trigger={['click']}
+                placement="bottomRight"
+              >
+                <Button type="text" icon={<MoreOutlined />} size="large" />
+              </Dropdown>
+            </div>
+
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex justify-center mb-4">
+                <Avatar
+                  size={200}
+                  src={selectedConversation.avatar_url}
+                  className="border-4 border-gray-100"
+                />
+              </div>
+              <div className="text-center">
+                <Text strong className="text-2xl block mb-2">
+                  {selectedConversation.name || 'Unknown'}
+                </Text>
+                <Text className="text-gray-500 text-base">
+                  Last Active : {formatMessageTime(selectedConversation.updated_at)}
+                </Text>
+              </div>
+            </div>
+
+            <div className="flex-1 p-6">
+              <Text strong className="text-xl block mb-4">Media file(s)</Text>
+              <Tabs
+                defaultActiveKey="videos"
+                items={[
+                  {
+                    key: 'videos',
+                    label: 'Videos',
+                    children: (
+                      <div className="grid grid-cols-3 gap-3">
+                        {[1, 2, 3, 4, 5, 6].map((item) => (
+                          <div
+                            key={item}
+                            className="aspect-video bg-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden"
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 opacity-50" />
+                            <PlayCircleOutlined className="text-white text-4xl relative z-10" />
+                          </div>
+                        ))}
+                      </div>
+                    ),
+                  },
+                  {
+                    key: 'images',
+                    label: 'Images',
+                    children: (
+                      <div className="grid grid-cols-3 gap-3">
+                        {[1, 2, 3, 4, 5, 6].map((item) => (
+                          <div
+                            key={item}
+                            className="aspect-square bg-gray-200 rounded-lg"
+                          />
+                        ))}
+                      </div>
+                    ),
+                  },
+                  {
+                    key: 'audios',
+                    label: 'Audios',
+                    children: <div className="text-center text-gray-400 py-8">No audio files</div>,
+                  },
+                  {
+                    key: 'links',
+                    label: 'Links',
+                    children: <div className="text-center text-gray-400 py-8">No links</div>,
+                  },
+                  {
+                    key: 'documents',
+                    label: 'Documents',
+                    children: <div className="text-center text-gray-400 py-8">No documents</div>,
+                  },
+                ]}
+              />
+            </div>
+
+            <div className="p-4 border-t border-gray-200">
+              <Button
+                type="primary"
+                size="large"
+                className="w-full"
+                onClick={() => setShowUserInfo(false)}
+              >
+                Back to Chat
+              </Button>
+            </div>
+          </div>
         ) : (
           <div className="flex-1 flex items-center justify-center bg-gray-50">
             <div className="text-center">
@@ -572,6 +708,34 @@ function Chat() {
           </div>
         )}
       </div>
+
+      <Modal
+        title="Create New Chat"
+        open={showCreateChat}
+        onOk={handleCreateChat}
+        onCancel={() => {
+          setShowCreateChat(false);
+          createChatForm.resetFields();
+        }}
+        okText="Create"
+      >
+        <Form form={createChatForm} layout="vertical" className="mt-4">
+          <Form.Item
+            name="name"
+            label="Chat Name"
+            rules={[{ required: true, message: 'Please enter a chat name' }]}
+          >
+            <Input placeholder="Enter chat name" />
+          </Form.Item>
+          <Form.Item
+            name="participants"
+            label="Participants (User IDs)"
+            help="Enter user IDs separated by commas"
+          >
+            <Input placeholder="user-id-1, user-id-2" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }
