@@ -36,6 +36,10 @@ export interface Message {
   sender_id: string;
   content: string;
   is_read: boolean;
+  is_pinned: boolean;
+  is_system_message: boolean;
+  message_type: 'text' | 'system' | 'image' | 'file';
+  replied_to_message_id?: string;
   created_at: string;
 }
 
@@ -343,6 +347,97 @@ const ChatService = {
     } catch (error) {
       console.error('Error getting conversation counts:', error);
       return { personal: 0, group: 0, public: 0 };
+    }
+  },
+
+  async getPinnedMessages(conversationId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('conversation_id', conversationId)
+        .eq('is_pinned', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      return data as Message[];
+    } catch (error) {
+      console.error('Error fetching pinned messages:', error);
+      return [];
+    }
+  },
+
+  async pinMessage(messageId: string, pin: boolean = true) {
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ is_pinned: pin })
+        .eq('id', messageId);
+
+      if (error) throw error;
+
+      return true;
+    } catch (error) {
+      console.error('Error pinning message:', error);
+      return false;
+    }
+  },
+
+  async deleteMessage(messageId: string) {
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .delete()
+        .eq('id', messageId);
+
+      if (error) throw error;
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      return false;
+    }
+  },
+
+  async searchMessages(conversationId: string, query: string) {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('conversation_id', conversationId)
+        .ilike('content', `%${query}%`)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      return data as Message[];
+    } catch (error) {
+      console.error('Error searching messages:', error);
+      return [];
+    }
+  },
+
+  async sendSystemMessage(conversationId: string, content: string) {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .insert({
+          conversation_id: conversationId,
+          sender_id: 'system',
+          content,
+          is_system_message: true,
+          message_type: 'system',
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return data as Message;
+    } catch (error) {
+      console.error('Error sending system message:', error);
+      return null;
     }
   },
 };
