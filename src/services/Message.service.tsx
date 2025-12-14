@@ -16,6 +16,12 @@ const MessageService = {
             <Aicon.CloseOutlined className="text-xs" onClick={() => message.destroy()}/>
         </div>, duration: duration});
     },
+    info: (content:string, duration = ERROR_MESSAGE_TIMING)=>{
+        message.info({key:content, type:'info', content: <div className="flex justify-between gap-4">
+            {content}
+            <Aicon.CloseOutlined className="text-xs" onClick={() => message.destroy()}/>
+        </div>, duration: duration});
+    },
     setConfig: (config:any)=>{
         message.config(config);
     },

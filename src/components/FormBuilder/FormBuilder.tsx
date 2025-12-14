@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, Button, Row, Col, Space, Tooltip } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { FormBuilderProps } from './types';
@@ -19,6 +19,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
+  const [visibleFields, setVisibleFields] = useState<Set<string>>(new Set());
 
   const {
     fields,
@@ -73,6 +74,10 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
       </span>
     ) : undefined;
 
+    const itemClassName = field.className
+      ? `form-builder-field ${field.className}`
+      : 'form-builder-field';
+
     return (
       <Col key={field.name} span={colSpan}>
         <Form.Item
@@ -81,7 +86,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           rules={rules}
           dependencies={field.dependencies}
           help={field.help}
-          className={field.className}
+          className={itemClassName}
           style={field.style}
           initialValue={field.defaultValue}
           valuePropName={field.type === 'checkbox' || field.type === 'switch' ? 'checked' : 'value'}
@@ -104,6 +109,33 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     }
   };
 
+  useEffect(() => {
+    const formValues = form.getFieldsValue();
+    const newVisibleFields = new Set<string>();
+
+    fields.forEach((field) => {
+      const isVisible = !field.hidden && (!field.visibleWhen || field.visibleWhen(formValues));
+      if (isVisible) {
+        newVisibleFields.add(field.name);
+      }
+    });
+
+    const previouslyVisible = Array.from(visibleFields);
+    const nowHidden = previouslyVisible.filter(name => !newVisibleFields.has(name));
+
+    if (nowHidden.length > 0) {
+      form.setFields(
+        nowHidden.map(name => ({
+          name,
+          errors: [],
+          warnings: [],
+        }))
+      );
+    }
+
+    setVisibleFields(newVisibleFields);
+  }, [form.getFieldsValue()]);
+
   return (
     <Form
       form={form}
@@ -123,6 +155,34 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
       <Form.Item noStyle shouldUpdate>
         {() => {
           const formValues = form.getFieldsValue();
+          const newVisibleFields = new Set<string>();
+
+          fields.forEach((field) => {
+            const isVisible = !field.hidden && (!field.visibleWhen || field.visibleWhen(formValues));
+            if (isVisible) {
+              newVisibleFields.add(field.name);
+            }
+          });
+
+          const previouslyVisible = Array.from(visibleFields);
+          const nowHidden = previouslyVisible.filter(name => !newVisibleFields.has(name));
+
+          if (nowHidden.length > 0) {
+            setTimeout(() => {
+              form.setFields(
+                nowHidden.map(name => ({
+                  name,
+                  errors: [],
+                }))
+              );
+            }, 0);
+          }
+
+          if (newVisibleFields.size !== visibleFields.size ||
+              !Array.from(newVisibleFields).every(name => visibleFields.has(name))) {
+            setVisibleFields(newVisibleFields);
+          }
+
           return (
             <Row gutter={[16, 0]}>
               {fields.map((field) => renderField(field, formValues))}

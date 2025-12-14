@@ -2,10 +2,12 @@ import { AndroidFilled, AppleFilled, ArrowLeftOutlined, UserOutlined } from '@an
 import { API_ENDPOINTS, URLS } from '../constants/Urls';
 import { useState } from 'react';
 import { Form, Input, Button, Checkbox } from 'antd';
-import { EmailPhoneInput, Icons } from '../components';
+import { EmailPhoneInput, Icons, FormBuilder } from '../components';
 import { Link } from 'react-router-dom';
 import MessageService from '../services/Message.service';
 import ApiService from '../services/Api.service';
+import { useSignupForm } from '../forms/signup';
+import { useResetPasswordForm } from '../forms/reset-password';
 
 function LandingHeader(){
   return (
@@ -57,11 +59,13 @@ function Landing(props:any) {
   const [form] = Form.useForm();
   const [contactValue, setContactValue] = useState('');
   const [password, setPassword] = useState('');
-  const [otp, setOtp] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
 
   const [isContactValid, setIsContactValid] = useState(false);
   const [view, setView] = useState(props.show ? props.show : "login");
+
+  const { signupFormConfig, otpSent, setOtpSent } = useSignupForm();
+  const { resetPasswordFormConfig, codeSent, setCodeSent } = useResetPasswordForm();
 
   const formData = ()=>{
     return {
@@ -86,17 +90,46 @@ function Landing(props:any) {
             }
           }
         });
-      }else if(view == "signup"){
-        ApiService.post(API_ENDPOINTS.ACCOUNT.SIGNUP,formData(),{},(error)=>{
-          if(error?.response?.data?.status === "error"){
-            MessageService.error(error.response.data.message);
-          }
-        });
-      }else if(view == "reset-password"){
-        MessageService.success('Password reset link sent to your email/phone');
       }
     } catch (error) {
       console.error('Form validation failed:', error);
+    }
+  };
+
+  const handleSignup = async (values: any) => {
+    if (!otpSent) {
+      MessageService.info('Sending OTP to your email/mobile...');
+      setTimeout(() => {
+        setOtpSent(true);
+        MessageService.success('OTP sent successfully! Please check your email/mobile.');
+      }, 1000);
+    } else {
+      ApiService.post(API_ENDPOINTS.ACCOUNT.SIGNUP, {
+        username: values.emailOrMobile,
+        password: values.password,
+        otp: values.otp,
+        scope: 1,
+      }, {}, (error) => {
+        if (error?.response?.data?.status === "error") {
+          MessageService.error(error.response.data.message);
+        }
+      });
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!codeSent) {
+      MessageService.info('Sending verification code...');
+      setTimeout(() => {
+        setCodeSent(true);
+        MessageService.success('Verification code sent! Please check your email/mobile.');
+      }, 1000);
+    } else {
+      MessageService.success('Password reset successfully! Redirecting to login...');
+      setTimeout(() => {
+        setView("login");
+        setCodeSent(false);
+      }, 1500);
     }
   };
 
@@ -105,50 +138,56 @@ function Landing(props:any) {
       <LandingHeader></LandingHeader>
       <main className="flex-1 flex items-center justify-center bg-[url('/src/public/image/BG.svg')] bg-cover bg-center bg-no-repeat">
         <LandingCarousel></LandingCarousel>
-        <div className="w-[380px] h-[60vh] flex flex-col items-center justify-around max-w-xl mx-auto shadow-lg bg-white rounded-lg p-8 box-border">
+        <div className="w-[380px] min-h-[60vh] flex flex-col items-center justify-around max-w-xl mx-auto shadow-lg bg-white rounded-lg p-8 box-border">
 
-          <h2 className="text-2xl font-bold text-gray-800">
-            {view == "login" ?"LOGIN":""}
-            {view == "signup" ?"Create Free Account":""}
-            {view == "reset-password" ? <div><Link to="/login" onClick={()=>setView("login")}><ArrowLeftOutlined className='mr-10'/></Link><span className='mr-10'>Reset Password</span></div>:""}
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            {view == "login" && "LOGIN"}
+            {view == "signup" && "Create Free Account"}
+            {view == "reset-password" && (
+              <div>
+                <Link to="/login" onClick={() => { setView("login"); setCodeSent(false); }}>
+                  <ArrowLeftOutlined className='mr-10'/>
+                </Link>
+                <span className='mr-10'>Reset Password</span>
+              </div>
+            )}
           </h2>
-          
-          <Form
-            form={form}
-            layout="vertical"
-            className="w-full"
-            validateTrigger={['onBlur', 'onSubmit']}
-          >
-            <Form.Item
-              name="contact"
-              rules={[
-                { required: true, message: 'Please enter your email or phone number' },
-                {
-                  validator: (_, value) => {
-                    if (!value) return Promise.resolve();
-                    if (!isContactValid) {
-                      return Promise.reject(new Error('Please enter a valid email or phone number'));
-                    }
-                    return Promise.resolve();
-                  }
-                }
-              ]}
-              validateTrigger={['onBlur']}
-              className="mb-8"
+
+          {view === "login" && (
+            <Form
+              form={form}
+              layout="vertical"
+              className="w-full"
+              validateTrigger={['onBlur', 'onSubmit']}
             >
-              <EmailPhoneInput
-                value={contactValue}
-                onChange={(value) => {
-                  setContactValue(value);
-                  form.setFieldValue('contact', value);
-                }}
-                onValidationChange={setIsContactValid}
-                prefix={<UserOutlined className='text-grey'/>}
-                placeholder="Email or phone number"
-              />
-            </Form.Item>
-            {
-              view != "reset-password" &&
+              <Form.Item
+                name="contact"
+                rules={[
+                  { required: true, message: 'Please enter your email or phone number' },
+                  {
+                    validator: (_, value) => {
+                      if (!value) return Promise.resolve();
+                      if (!isContactValid) {
+                        return Promise.reject(new Error('Please enter a valid email or phone number'));
+                      }
+                      return Promise.resolve();
+                    }
+                  }
+                ]}
+                validateTrigger={['onBlur']}
+                className="mb-8"
+              >
+                <EmailPhoneInput
+                  value={contactValue}
+                  onChange={(value) => {
+                    setContactValue(value);
+                    form.setFieldValue('contact', value);
+                  }}
+                  onValidationChange={setIsContactValid}
+                  prefix={<UserOutlined className='text-grey'/>}
+                  placeholder="Email or phone number"
+                />
+              </Form.Item>
               <Form.Item
                 name="password"
                 rules={[
@@ -168,59 +207,50 @@ function Landing(props:any) {
                   placeholder="Enter your password"
                 />
               </Form.Item>
-            }
-            {
-              view == "signup" &&
-              <Form.Item
-                name="otp"
-                rules={[
-                  { required: true, message: 'Please enter the OTP sent to you' },
-                  { len: 6, message: 'OTP must be 6 digits' },
-                  { pattern: /^\d+$/, message: 'OTP must contain only numbers' }
-                ]}
-                validateTrigger={['onBlur']}
-                className="mb-8"
-              >
-                <Input
-                  value={otp}
-                  onChange={(e) => {
-                    setOtp(e.target.value);
-                    form.setFieldValue('otp', e.target.value);
-                  }}
-                  prefix={<Icons.KeyOutline className='text-grey'/>}
-                  placeholder="Enter 6-digit OTP"
-                  maxLength={6}
-                />
-              </Form.Item>
-            }
-
-            {
-              view == "login" &&
               <div className="flex justify-between mb-8">
-                  <Checkbox checked={rememberMe} onChange={(e:any)=>setRememberMe(e.target.checked)}>Remember me</Checkbox>
-                  <Link to="/reset-password" className="text-link" onClick={()=>setView("reset-password")}>Forgot Password ?</Link>
+                <Checkbox checked={rememberMe} onChange={(e:any)=>setRememberMe(e.target.checked)}>Remember me</Checkbox>
+                <Link to="/reset-password" className="text-link" onClick={()=>setView("reset-password")}>Forgot Password ?</Link>
               </div>
-            }
+              <Form.Item className="mb-0 flex justify-center">
+                <Button type="primary" htmlType="submit" onClick={handleAuth}>
+                  Login Now
+                </Button>
+              </Form.Item>
+            </Form>
+          )}
 
-            <Form.Item className="mb-0 flex justify-center">
-              <Button type="primary" htmlType="submit" onClick={handleAuth}>
-                {view == "login" && <>Login Now</>}
-                {view == "signup" && <>Continue & Send OTP</>}
-                {view == "reset-password" && <>Send Verification Code</>}
-              </Button>
-            </Form.Item>
-          </Form>
+          {view === "signup" && (
+            <div className="w-full">
+              <FormBuilder
+                config={signupFormConfig}
+                onSubmit={handleSignup}
+                submitText={otpSent ? "Verify & Create Account" : "Continue & Send OTP"}
+                showReset={false}
+              />
+            </div>
+          )}
 
-          <div className='flex flex-col items-center'>
+          {view === "reset-password" && (
+            <div className="w-full">
+              <FormBuilder
+                config={resetPasswordFormConfig}
+                onSubmit={handleResetPassword}
+                submitText={codeSent ? "Reset Password" : "Send Verification Code"}
+                showReset={false}
+              />
+            </div>
+          )}
+
+          <div className='flex flex-col items-center mt-4'>
             <p className="flex items-center gap-1 text-sm">
-              { 
+              {
                 view == "login" &&  <>
                   <span>Don't have an account ?</span>
-                  <Link to="/signup" className="text-link" onClick={()=>setView("signup")}>Signup here</Link>
+                  <Link to="/signup" className="text-link" onClick={() => { setView("signup"); setOtpSent(false); }}>Signup here</Link>
                 </>
                 }{ (view == "signup" || view == "reset-password") &&  <>
                   <span>Already had an account ?</span>
-                  <Link to="/login" className="text-link" onClick={()=>setView("login")}>Login here</Link>
+                  <Link to="/login" className="text-link" onClick={() => { setView("login"); setOtpSent(false); setCodeSent(false); }}>Login here</Link>
                 </>
               }
             </p>
