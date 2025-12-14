@@ -25,7 +25,7 @@ const DateTimeInput = (props: DateTimeInputProps) => {
     const S_FORMAT = "ss";
 
     const DEFAULT_FORMAT_STRUCTURE = [D_FORMAT,"-",M_FORMAT,"-",Y_FORMAT," ",H_FORMAT,":",m_FORMAT,":",S_FORMAT];
-    const DEFAULT_FORMAT_VALUES = {
+    const DEFAULT_FORMAT_VALUES:any = {
         [Y_FORMAT]:{ST:1500, EN: moment().year(), DE:'2000', FORMAT: "year"},
         [M_FORMAT]:{ST:1, EN:12, DE:'01', FORMAT: "month"},
         [D_FORMAT]:{ST:1, EN:31, DE:'01', FORMAT: "date"},
@@ -36,7 +36,7 @@ const DateTimeInput = (props: DateTimeInputProps) => {
     const REGEX = /([\- :/,])/;
 
 
-    const [format, setFormat] = useState("date");
+    const [format, setFormat]:any = useState("date");
     const [open, setOpen] = useState(false);
     const [gridCss, setGridCss] = useState("");
     const [formatStructure, setFormatStructure] = useState(DEFAULT_FORMAT_STRUCTURE);
@@ -48,7 +48,7 @@ const DateTimeInput = (props: DateTimeInputProps) => {
     const [m, setm] = useState(m_FORMAT);
     const [S, setS] = useState(S_FORMAT);
 
-    const getOutputValue = (formatStructure) => {
+    const getOutputValue = (formatStructure:any) => {
         const output = _.reduce(formatStructure, (value, structure) => {
             return value + getStructureValue(structure);
         }, "");
@@ -60,27 +60,27 @@ const DateTimeInput = (props: DateTimeInputProps) => {
         return allEmpty ? "" : output;
 };
 
-    const getDateValue = (formatStructure)=>{
+    const getDateValue = (formatStructure:any)=>{
         return _.reduce(formatStructure, (value, structure)=>{
             return value + getStructureValue(structure, true)
         }, "");
     }
 
-    const setInputValue = (fstructure, value)=>{
+    const setInputValue = (fstructure:any, value:any)=>{
         let inputValue = value.split(REGEX);
         _.map(fstructure, (structure, i)=>{
             setFormatText(structure, inputValue[i]);
         });
     }
 
-    const getGridCss = (formatStructure)=>{
-        return _.reduce(formatStructure, (chlist, split)=>{
+    const getGridCss = (formatStructure:any)=>{
+        return _.reduce(formatStructure, (chlist:any, split)=>{
             return [...chlist, split.length+'ch']
         }, []).join(" ");
     }
 
 
-    const getStructureValue = (structure, defaultValue = false)=>{
+    const getStructureValue = (structure:any, defaultValue = false)=>{
         return (
             structure == Y_FORMAT ? (Y == Y_FORMAT || Y == "" ? (defaultValue ? DEFAULT_FORMAT_VALUES[Y_FORMAT].DE:""):Y):
             structure == M_FORMAT ? (M == M_FORMAT || M == "" ? (defaultValue ? DEFAULT_FORMAT_VALUES[M_FORMAT].DE:""):M):
@@ -91,7 +91,7 @@ const DateTimeInput = (props: DateTimeInputProps) => {
         )
     }
 
-    const setFormatText = async (format, value) =>{
+    const setFormatText = async (format:any, value:any) =>{
         if(format == Y_FORMAT){await setY(value)};
         if(format == M_FORMAT){await setM(value)};
         if(format == D_FORMAT){await setD(value)};
@@ -100,7 +100,7 @@ const DateTimeInput = (props: DateTimeInputProps) => {
         if(format == S_FORMAT){await setS(value)};
     }
 
-    const onChange = async (date)=>{
+    const onChange = async (date:any)=>{
         if(format == "year" || format == "month" || format == "date"){
             let formatTemp, valueTemp;
             if(format ==  "year"){ formatTemp = Y_FORMAT; valueTemp = (date.$y);}
@@ -127,18 +127,18 @@ const DateTimeInput = (props: DateTimeInputProps) => {
         }
     }, [D, M, Y, H, m, S]);
 
-    function getNextByClass(currentEl, className) {
+    function getNextByClass(currentEl:any, className:any) {
         var allMatches = $('.' + className); // all elements with the target class
         var currentIndex = allMatches.index(currentEl);
         return currentIndex+1 < allMatches.length ? allMatches.eq(currentIndex + 1): undefined; // the next one after current
     }
-    function getPreviousByClass(currentEl, className) {
+    function getPreviousByClass(currentEl:any, className:any) {
         var allMatches = $('.' + className); // all elements with the target class
         var currentIndex = allMatches.index(currentEl);
         return currentIndex == 0 ? undefined : allMatches.eq(currentIndex - 1); // the next one after current
     }
 
-    function checkValid(format, value){
+    function checkValid(format:any, value:any){
         let val = Number(value);
         if(DEFAULT_FORMAT_VALUES[format].ST <= val && val <= DEFAULT_FORMAT_VALUES[format].EN){
             return true;
@@ -147,7 +147,7 @@ const DateTimeInput = (props: DateTimeInputProps) => {
         }
     }
 
-    const openInput = (e)=>{
+    const openInput = (e:any)=>{
         if($(e.target).hasClass("smart-date-picker-container")){
             let found = false;
             let elements = $(".smart-date-picker-text").get();
@@ -163,7 +163,7 @@ const DateTimeInput = (props: DateTimeInputProps) => {
         }
     }
 
-    const closeInput = (e)=>{
+    const closeInput:any = (e:any)=>{
         if($(e.target).closest('.smart-date-picker-dropdown').length == 0){
             setOpen(false);
         }
@@ -191,9 +191,9 @@ const DateTimeInput = (props: DateTimeInputProps) => {
 
         // Keyup
         $(".smart-date-picker-text").off('keyup').on('keyup',(e)=>{
-            let format = $(e.target).attr("format");
+            let format:any = $(e.target).attr("format");
             if((e.keyCode > 47 && e.keyCode < 59)){
-                let innerText = e.target.innerHTML;
+                let innerText:any = e.target.innerHTML;
                 if(isNaN(innerText)){
                     e.preventDefault();
                     return;
@@ -241,7 +241,7 @@ const DateTimeInput = (props: DateTimeInputProps) => {
 
         // Onblur
         $(".smart-date-picker-text").off('blur').on('blur',(e)=>{            
-            let format = $(e.target).attr("format");
+            let format:any = $(e.target).attr("format");
             let numberText = e.target.innerHTML;
             if(numberText.length != 0 && format.length != numberText.length){
                 e.target.innerHTML = '0'.repeat((format.length - numberText.length)) + numberText;
@@ -254,7 +254,7 @@ const DateTimeInput = (props: DateTimeInputProps) => {
 
         // Onclick|focus
         $(".smart-date-picker-text").on('focus click',(e)=>{
-            let format = $(e.target).attr("format");
+            let format:any = $(e.target).attr("format");
             setFormat(DEFAULT_FORMAT_VALUES[format].FORMAT);
             setOpen(true);
             setTimeout(()=>{
@@ -270,7 +270,7 @@ const DateTimeInput = (props: DateTimeInputProps) => {
             range.selectNodeContents(e.target);                
             range.collapse(false);
             
-            let selection = document.getSelection();
+            let selection:any = document.getSelection();
             selection.removeAllRanges();
             selection.addRange(range);
             e.target.focus();
@@ -284,12 +284,13 @@ const DateTimeInput = (props: DateTimeInputProps) => {
                 <div className="smart-date-picker-container" onClick={openInput}>
                     <DatePicker value={dayjs(getDateValue(formatStructure), formatStructure.join(""))} picker={format} popupClassName={"smart-date-picker-dropdown smart-"+format}  open={open} needConfirm={format == "time"} showNow={false} onChange={onChange} onOk={onOk}/>
                     <span className="smart-date-picker-placeholder">{formatStructure.join("")}</span>
-                    <span className="smart-date-picker-text-container" style={{'grid-template-columns':gridCss}}>                        
+                    <span className="smart-date-picker-text-container" style={{gridTemplateColumns:gridCss}}>                        
                         {formatStructure.map((structure)=>{
                             if(structure.length == 1){
                                 return (<span className="placeholder-color">{structure}</span>);
                             }else{
-                                return(<span><span className="smart-date-picker-text" format={structure} type="text" role="textbox" contentEditable="true" suppressContentEditableWarning={true}>{getStructureValue(structure)}</span></span>);
+                                // format={structure} type="text" 
+                                return(<span><span className="smart-date-picker-text" role="textbox" contentEditable="true" suppressContentEditableWarning={true}>{getStructureValue(structure)}</span></span>);
                             }
                         })}
                     </span>
