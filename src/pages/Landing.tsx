@@ -53,7 +53,8 @@ function LandingCarousel(){
 }
 
 function Landing(props:any) {
-  
+
+  const [form] = Form.useForm();
   const [contactValue, setContactValue] = useState('');
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
@@ -71,21 +72,10 @@ function Landing(props:any) {
     };
   }
 
-  const isInputValid = ()=>{
-    if (!isContactValid) {
-      MessageService.error('Please enter a valid email or phone number');
-      return false;
-    }
-    if (!password) {
-      MessageService.error('Please enter your password');
-      return false;
-    }
-    return true;
-  }
+  const handleAuth = async () => {
+    try {
+      await form.validateFields();
 
-
-  const handleAuth = () => {
-    if(isInputValid()){
       if(view == "login"){
         ApiService.post(API_ENDPOINTS.ACCOUNT.LOGIN,formData(),{},(error)=>{
           if(error?.response?.data?.status === "error"){
@@ -95,12 +85,19 @@ function Landing(props:any) {
                 MessageService.error(error.response.data.message);
             }
           }
-        });  
+        });
       }else if(view == "signup"){
-        
-      }  
+        ApiService.post(API_ENDPOINTS.ACCOUNT.SIGNUP,formData(),{},(error)=>{
+          if(error?.response?.data?.status === "error"){
+            MessageService.error(error.response.data.message);
+          }
+        });
+      }else if(view == "reset-password"){
+        MessageService.success('Password reset link sent to your email/phone');
+      }
+    } catch (error) {
+      console.error('Form validation failed:', error);
     }
-
   };
 
   return (
@@ -116,38 +113,91 @@ function Landing(props:any) {
             {view == "reset-password" ? <div><Link to="/login" onClick={()=>setView("login")}><ArrowLeftOutlined className='mr-10'/></Link><span className='mr-10'>Reset Password</span></div>:""}
           </h2>
           
-          <Form layout="vertical" className="w-full">
-            <Form.Item required className="mb-8">
-              <EmailPhoneInput 
-                value={contactValue} 
-                onChange={setContactValue} 
-                onValidationChange={setIsContactValid} 
-                prefix={<UserOutlined className='text-grey'/>} 
-                placeholder="Email or phone number"/>
+          <Form
+            form={form}
+            layout="vertical"
+            className="w-full"
+            validateTrigger={['onBlur', 'onSubmit']}
+          >
+            <Form.Item
+              name="contact"
+              rules={[
+                { required: true, message: 'Please enter your email or phone number' },
+                {
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    if (!isContactValid) {
+                      return Promise.reject(new Error('Please enter a valid email or phone number'));
+                    }
+                    return Promise.resolve();
+                  }
+                }
+              ]}
+              validateTrigger={['onBlur', 'onChange']}
+              className="mb-8"
+            >
+              <EmailPhoneInput
+                value={contactValue}
+                onChange={(value) => {
+                  setContactValue(value);
+                  form.setFieldValue('contact', value);
+                }}
+                onValidationChange={setIsContactValid}
+                prefix={<UserOutlined className='text-grey'/>}
+                placeholder="Email or phone number"
+              />
             </Form.Item>
             {
               view != "reset-password" &&
-              <Form.Item required className="mb-8">
-                <Input.Password 
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)} 
-                  prefix={<Icons.KeyOutline className='text-grey'/>} 
-                  placeholder="Enter your password"/>
+              <Form.Item
+                name="password"
+                rules={[
+                  { required: true, message: 'Please enter your password' },
+                  { min: 6, message: 'Password must be at least 6 characters' }
+                ]}
+                validateTrigger={['onBlur', 'onChange']}
+                className="mb-8"
+              >
+                <Input.Password
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    form.setFieldValue('password', e.target.value);
+                  }}
+                  prefix={<Icons.KeyOutline className='text-grey'/>}
+                  placeholder="Enter your password"
+                  size="large"
+                />
               </Form.Item>
             }
             {
-              view == "signup" &&  
-              <Form.Item required className="mb-8">
-                <Input.Password 
-                  value={otp} 
-                  onChange={(e) => setOtp(e.target.value)} 
-                  prefix={<Icons.KeyOutline className='text-grey'/>} 
-                  placeholder="Enter OTP sent"/>
+              view == "signup" &&
+              <Form.Item
+                name="otp"
+                rules={[
+                  { required: true, message: 'Please enter the OTP sent to you' },
+                  { len: 6, message: 'OTP must be 6 digits' },
+                  { pattern: /^\d+$/, message: 'OTP must contain only numbers' }
+                ]}
+                validateTrigger={['onBlur', 'onChange']}
+                className="mb-8"
+              >
+                <Input
+                  value={otp}
+                  onChange={(e) => {
+                    setOtp(e.target.value);
+                    form.setFieldValue('otp', e.target.value);
+                  }}
+                  prefix={<Icons.KeyOutline className='text-grey'/>}
+                  placeholder="Enter 6-digit OTP"
+                  maxLength={6}
+                  size="large"
+                />
               </Form.Item>
             }
 
-            { 
-              view == "login" &&  
+            {
+              view == "login" &&
               <div className="flex justify-between mb-8">
                   <Checkbox checked={rememberMe} onChange={(e:any)=>setRememberMe(e.target.checked)}>Remember me</Checkbox>
                   <Link to="/reset-password" className="text-link" onClick={()=>setView("reset-password")}>Forgot Password ?</Link>
@@ -155,7 +205,7 @@ function Landing(props:any) {
             }
 
             <Form.Item className="mb-0 flex justify-center">
-              <Button type="primary" htmlType="submit" onClick={handleAuth}>
+              <Button type="primary" htmlType="submit" onClick={handleAuth} size="large">
                 {view == "login" && <>Login Now</>}
                 {view == "signup" && <>Continue & Send OTP</>}
                 {view == "reset-password" && <>Send Verification Code</>}
