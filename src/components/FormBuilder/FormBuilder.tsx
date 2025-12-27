@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Form, Button, Row, Col, Space, Tooltip } from 'antd';
+import { useState, useRef } from 'react';
+import { Form, Button, Row, Col, Space, Tooltip, Input } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { FormBuilderProps } from './types';
 import { FieldRenderer, getFieldRules } from './FieldRenderer';
 import './FormBuilder.css';
+import Password from 'antd/es/input/Password';
 
 export const FormBuilder: React.FC<FormBuilderProps> = ({
   config,
@@ -12,14 +13,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   initialValues,
   submitText = 'Submit',
   resetText = 'Reset',
-  showReset = true,
+  showReset = false,
   loading = false,
   disabled = false,
   children,
 }) => {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
-  const [visibleFields, setVisibleFields] = useState<Set<string>>(new Set());
+  const visibleFieldsRef = useRef<Set<string>>(new Set());
 
   const {
     fields,
@@ -90,7 +91,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           style={field.style}
           initialValue={field.defaultValue}
           valuePropName={field.type === 'checkbox' || field.type === 'switch' ? 'checked' : 'value'}
-          validateFirst
+          validateTrigger={['onBlur']}
         >
           <FieldRenderer config={field} form={form} />
         </Form.Item>
@@ -109,32 +110,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     }
   };
 
-  useEffect(() => {
-    const formValues = form.getFieldsValue();
-    const newVisibleFields = new Set<string>();
-
-    fields.forEach((field) => {
-      const isVisible = !field.hidden && (!field.visibleWhen || field.visibleWhen(formValues));
-      if (isVisible) {
-        newVisibleFields.add(field.name);
-      }
-    });
-
-    const previouslyVisible = Array.from(visibleFields);
-    const nowHidden = previouslyVisible.filter(name => !newVisibleFields.has(name));
-
-    if (nowHidden.length > 0) {
-      form.setFields(
-        nowHidden.map(name => ({
-          name,
-          errors: [],
-          warnings: [],
-        }))
-      );
+  const handleValuesChange = (changedValues: any, allValues: any) => {
+    // Call user's onValuesChange if provided
+    if (onValuesChange) {
+      onValuesChange(changedValues, allValues);
     }
-
-    setVisibleFields(newVisibleFields);
-  }, [form.getFieldsValue()]);
+  };
 
   return (
     <Form
@@ -144,52 +125,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
       wrapperCol={wrapperCol}
       size={size}
       onFinish={handleSubmit}
-      onValuesChange={onValuesChange}
+      onValuesChange={handleValuesChange}
       initialValues={initialValues}
       disabled={disabled}
       className={`form-builder ${className || ''}`}
       style={style}
       scrollToFirstError
-      validateTrigger={['onChange', 'onBlur']}
     >
-      <Form.Item noStyle shouldUpdate>
-        {() => {
-          const formValues = form.getFieldsValue();
-          const newVisibleFields = new Set<string>();
-
-          fields.forEach((field) => {
-            const isVisible = !field.hidden && (!field.visibleWhen || field.visibleWhen(formValues));
-            if (isVisible) {
-              newVisibleFields.add(field.name);
-            }
-          });
-
-          const previouslyVisible = Array.from(visibleFields);
-          const nowHidden = previouslyVisible.filter(name => !newVisibleFields.has(name));
-
-          if (nowHidden.length > 0) {
-            setTimeout(() => {
-              form.setFields(
-                nowHidden.map(name => ({
-                  name,
-                  errors: [],
-                }))
-              );
-            }, 0);
-          }
-
-          if (newVisibleFields.size !== visibleFields.size ||
-              !Array.from(newVisibleFields).every(name => visibleFields.has(name))) {
-            setVisibleFields(newVisibleFields);
-          }
-
-          return (
-            <Row gutter={[16, 0]}>
-              {fields.map((field) => renderField(field, formValues))}
-            </Row>
-          );
-        }}
-      </Form.Item>
+      <Row gutter={[16, 0]}>
+        {fields.map((field) => renderField(field, form.getFieldsValue()))}
+      </Row>
 
       {children}
 

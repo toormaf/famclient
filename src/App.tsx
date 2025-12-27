@@ -5,6 +5,7 @@ import ApiService from './services/Api.service';
 import AccountService from './services/Account.service';
 import { URLS } from './constants/Urls';
 import FamrootLayout from './layouts/FamrootLayout';
+import FormBuilderDemo from './pages/FormBuilderDemo';
 
 const Landing = lazy(() => import('./pages/Landing'));
 const Home = lazy(() => import('./pages/modules/Home'));
@@ -67,7 +68,7 @@ function App() {
             <Route path="/vault"            element={<A ><FamrootLayout selected="vault"><Vault/></FamrootLayout></A>}/>
             <Route path="/notes"            element={<A ><FamrootLayout selected="notes"><Notes/></FamrootLayout></A>}/>
             <Route path="/maps"             element={<A ><FamrootLayout selected="maps"><Maps/></FamrootLayout></A>}/>
-            <Route path="/settings/*"       element={<A ><FamrootLayout><Settings/></FamrootLayout></A>}/>
+            <Route path="/settings/*"       element={<A ><FamrootLayout><FormBuilderDemo/></FamrootLayout></A>}/>
             <Route path="/profile/*"        element={<A ><FamrootLayout><Profile/></FamrootLayout></A>}/>
             <Route path="/timeline/*"        element={<A ><FamrootLayout><Timeline/></FamrootLayout></A>}/>
           </Routes>

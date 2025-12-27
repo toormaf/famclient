@@ -21,7 +21,7 @@ interface FieldRendererProps {
   form?: any;
 }
 
-export const FieldRenderer: React.FC<FieldRendererProps> = ({ config, form }) => {
+export const FieldRenderer: React.FC<FieldRendererProps> = ({config, form, ...rest }) => {
   const {
     type,
     placeholder,
@@ -40,6 +40,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({ config, form }) =>
   } = config;
 
   const commonProps = {
+    ...rest,
     placeholder,
     disabled,
     size,
@@ -112,6 +113,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({ config, form }) =>
       );
 
     case 'password':
+      // debugger
       return (
         <Password
           {...commonProps}

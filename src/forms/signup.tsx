@@ -7,12 +7,10 @@ export const useSignupForm = () => {
   const signupFormConfig: FormConfig = {
     layout: 'vertical',
     columns: 1,
-    size: 'large',
     submitButtonAlign: 'center',
     fields: [
       {
         name: 'emailOrMobile',
-        label: 'Email or Mobile',
         type: 'emailOrMobile',
         placeholder: 'Enter your email or mobile number',
         required: true,
@@ -20,7 +18,6 @@ export const useSignupForm = () => {
       },
       {
         name: 'password',
-        label: 'Password',
         type: 'password',
         placeholder: 'Create a password',
         required: true,
@@ -30,7 +27,6 @@ export const useSignupForm = () => {
       },
       {
         name: 'otp',
-        label: 'Verification Code',
         type: 'otp',
         placeholder: 'Enter 6-digit code',
         required: otpSent,
