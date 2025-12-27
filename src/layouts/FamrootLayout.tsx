@@ -1,4 +1,4 @@
-import { Avatar, Drawer, Dropdown, Image, Layout, Menu } from "antd";
+import { Avatar, Badge, Drawer, Dropdown, Image, Layout, Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
 import * as Aicon from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -89,9 +89,9 @@ const FamrootLayout = (props:any)=>{
                         <Aicon.SearchOutlined className="txt20"/>
                     </Mobile> */}
                     <Aicon.SettingOutlined className="txt20" onClick={()=>handleMenuSwitch({key:'settings'})}/>
-                    {/* <Badge size="small" count={unreadNotificationCount}>
-                        <Aicon.BellOutlined className="txt20" onClick={showDrawer} /> 
-                    </Badge> */}
+                    <Badge size="small" count={1}>
+                        <Aicon.BellOutlined className="txt20" onClick={()=>setDrawerVisible(true)} /> 
+                    </Badge>
                     <Drawer title="Notifications" className={"notification-drawer"} open={drawerVisible} onClose={closeDrawer}>
                         {/* <NotificationList></NotificationList> */}
                     </Drawer>

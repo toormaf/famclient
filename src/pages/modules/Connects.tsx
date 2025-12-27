@@ -1,5 +1,6 @@
 import { Card, Typography, Avatar, List } from 'antd';
 import { TeamOutlined, UserOutlined } from '@ant-design/icons';
+import { FriendsCircle } from '../friends/FriendsCircle';
 
 const { Title } = Typography;
 
@@ -17,6 +18,7 @@ function Connects() {
         <TeamOutlined className="mr-2" />
         Connects
       </Title>
+      <FriendsCircle></FriendsCircle>
       <Card className="mt-6">
         <List
           itemLayout="horizontal"
